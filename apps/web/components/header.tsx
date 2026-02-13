@@ -2,7 +2,7 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
-import { Sword, History, Settings } from 'lucide-react';
+import { Sword, History, Settings, ArrowLeftRight } from 'lucide-react';
 
 export function Header() {
   return (
@@ -23,6 +23,13 @@ export function Header() {
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Chat
+          </Link>
+          <Link 
+            href="/swap" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            <ArrowLeftRight className="w-4 h-4" />
+            Swap
           </Link>
           <Link 
             href="/history" 

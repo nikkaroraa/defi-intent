@@ -10,7 +10,7 @@ import '@rainbow-me/rainbowkit/styles.css';
 
 // Define Katana chain
 const katana = {
-  id: 1911,
+  id: 747474,
   name: 'Katana',
   nativeCurrency: {
     decimals: 18,
