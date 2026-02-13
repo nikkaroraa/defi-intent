@@ -28,3 +28,31 @@ export {
   type MultiDepositRoute,
   type EncodedCall,
 } from "./router.js";
+
+// Historical
+export {
+  fetchYieldsWithHistory,
+  generateSimulatedHistory,
+  generateRebalanceSuggestions,
+  formatHistoricalAPY,
+  formatRebalanceSuggestion,
+  type HistoricalAPY,
+  type YieldWithHistory,
+  type RebalanceSuggestion,
+} from "./historical.js";
+
+// Rebalancer
+export {
+  fetchMultiChainYields,
+  compareAssetYields,
+  analyzePortfolio,
+  rankYieldsGlobally,
+  formatChainYields,
+  formatMultiChainComparison,
+  formatRankedYields,
+  type ChainYields,
+  type MultiChainComparison,
+  type Portfolio,
+  type PortfolioPosition,
+  type RankedYield,
+} from "./rebalancer.js";

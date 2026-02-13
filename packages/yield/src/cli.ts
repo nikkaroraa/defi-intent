@@ -8,6 +8,16 @@ import { formatUnits, type Address } from "viem";
 import { TOKENS, type YieldOpportunity, type Protocol } from "./config.js";
 import { fetchAllYields, getBestYield, getTopYields, getYieldsByProtocol } from "./aggregator.js";
 import { buildBestYieldRoute, buildSplitYieldRoute, formatRoute } from "./router.js";
+import {
+  fetchMultiChainYields,
+  compareAssetYields,
+  rankYieldsGlobally,
+  formatChainYields,
+  formatMultiChainComparison,
+  formatRankedYields,
+  type RankedYield,
+} from "./rebalancer.js";
+import { formatHistoricalAPY } from "./historical.js";
 
 // Colors
 const GREEN = "\x1b[0;32m";
@@ -62,13 +72,13 @@ function printOpp(opp: YieldOpportunity, index?: number) {
 function printHelp() {
   console.log(`
 ${BOLD}Katana Yield CLI${NC}
-Unified yield aggregator for Katana L2
+Unified yield aggregator with multi-chain rebalancer
 
 ${BOLD}Usage:${NC}
   npx tsx src/cli.ts <command> [options]
 
-${BOLD}Commands:${NC}
-  list                          List all yield opportunities
+${BOLD}Yield Commands:${NC}
+  list                          List all yield opportunities (Katana)
   list --protocol <name>        Filter by protocol (morpho, yearn, spectra, sushi-lp)
   list --min-apy <percent>      Filter by minimum APY (e.g., 5 for 5%)
   
@@ -78,14 +88,22 @@ ${BOLD}Commands:${NC}
   deposit <asset> <amount>      Build deposit route to best yield
   split <asset> <amount> [n]    Build split deposit across top N yields
 
+${BOLD}Rebalancer Commands:${NC}
+  rank                          Global yield rankings (all chains)
+  rank <asset>                  Rankings for specific asset
+  
+  compare <asset>               Compare yields across chains
+  
+  multichain                    List yields from all chains
+  
+  history <asset>               Show historical APY (7d, 30d, 50d averages)
+
 ${BOLD}Examples:${NC}
   npx tsx src/cli.ts list
-  npx tsx src/cli.ts list --protocol morpho
-  npx tsx src/cli.ts list --min-apy 5
-  npx tsx src/cli.ts best USDC
-  npx tsx src/cli.ts top WETH 5
-  npx tsx src/cli.ts deposit USDC 1000
-  npx tsx src/cli.ts split USDC 1000 3
+  npx tsx src/cli.ts rank USDC
+  npx tsx src/cli.ts compare ETH
+  npx tsx src/cli.ts multichain
+  npx tsx src/cli.ts history USDC
 `);
 }
 
@@ -219,6 +237,87 @@ async function cmdSplit(asset: string, amount: string, n: number = 2) {
 }
 
 // ===========================================
+// REBALANCER COMMANDS
+// ===========================================
+
+async function cmdRank(asset?: string) {
+  console.log(`\n${BOLD}${CYAN}⚔️ Global Yield Rankings${NC}${asset ? ` for ${asset}` : ''}\n`);
+  console.log(`Fetching yields from all chains...`);
+
+  try {
+    const ranked = await rankYieldsGlobally(asset);
+
+    if (ranked.length === 0) {
+      console.log(`${YELLOW}No yields found${NC}`);
+      return;
+    }
+
+    console.log(formatRankedYields(ranked));
+    console.log(`\n${ranked.length} opportunities ranked`);
+  } catch (e: any) {
+    console.error(`${RED}Error:${NC}`, e.message);
+  }
+}
+
+async function cmdCompare(asset: string) {
+  console.log(`\n${BOLD}${CYAN}⚔️ Cross-Chain Yield Comparison: ${asset}${NC}\n`);
+
+  try {
+    const comparison = await compareAssetYields(asset);
+    console.log(formatMultiChainComparison(comparison));
+  } catch (e: any) {
+    console.error(`${RED}Error:${NC}`, e.message);
+  }
+}
+
+async function cmdMultichain() {
+  console.log(`\n${BOLD}${CYAN}⚔️ Multi-Chain Yields${NC}\n`);
+
+  try {
+    const allChains = await fetchMultiChainYields();
+
+    for (const chain of allChains) {
+      console.log(formatChainYields(chain));
+    }
+
+    const total = allChains.reduce((sum, c) => sum + c.yields.length, 0);
+    console.log(`\n${total} total opportunities across ${allChains.length} chains`);
+  } catch (e: any) {
+    console.error(`${RED}Error:${NC}`, e.message);
+  }
+}
+
+async function cmdHistory(asset: string) {
+  console.log(`\n${BOLD}${CYAN}⚔️ Historical APY: ${asset}${NC}\n`);
+
+  try {
+    const ranked = await rankYieldsGlobally(asset);
+
+    if (ranked.length === 0) {
+      console.log(`${YELLOW}No yields found for ${asset}${NC}`);
+      return;
+    }
+
+    console.log(`${BOLD}Chain      | Protocol   | Current | 7d Avg  | 30d Avg | 50d Avg | Trend${NC}`);
+    console.log('-'.repeat(80));
+
+    for (const r of ranked.slice(0, 10)) {
+      const h = r.yield.historical;
+      const trendIcon = h.trend === 'up' ? `${GREEN}📈${NC}` : h.trend === 'down' ? `${RED}📉${NC}` : '➡️';
+      const volIcon = h.volatility === 'low' ? '🟢' : h.volatility === 'medium' ? '🟡' : '🔴';
+
+      console.log(
+        `${r.chain.padEnd(10)} | ${r.yield.protocol.padEnd(10)} | ${(h.current * 100).toFixed(2).padStart(6)}% | ${(h.avg7d * 100).toFixed(2).padStart(6)}% | ${(h.avg30d * 100).toFixed(2).padStart(6)}% | ${(h.avg50d * 100).toFixed(2).padStart(6)}% | ${trendIcon} ${volIcon}`
+      );
+    }
+
+    console.log(`\nLegend: 📈 Up 📉 Down ➡️ Stable | 🟢 Low Vol 🟡 Med Vol 🔴 High Vol`);
+  } catch (e: any) {
+    console.error(`${RED}Error:${NC}`, e.message);
+  }
+}
+
+// ===========================================
 // MAIN
 // ===========================================
 
@@ -268,6 +367,31 @@ async function main() {
           return;
         }
         await cmdSplit(args[1], args[2], parseInt(args[3]) || 2);
+        break;
+
+      // Rebalancer commands
+      case "rank":
+        await cmdRank(args[1]);
+        break;
+
+      case "compare":
+        if (!args[1]) {
+          console.error("Usage: compare <asset>");
+          return;
+        }
+        await cmdCompare(args[1]);
+        break;
+
+      case "multichain":
+        await cmdMultichain();
+        break;
+
+      case "history":
+        if (!args[1]) {
+          console.error("Usage: history <asset>");
+          return;
+        }
+        await cmdHistory(args[1]);
         break;
 
       default:
