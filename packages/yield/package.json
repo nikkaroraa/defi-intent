@@ -1,0 +1,41 @@
+{
+  "name": "@katana-intent/yield",
+  "version": "0.1.0",
+  "description": "Unified yield aggregator for Katana L2",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "katana-yield": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "cli": "tsx src/cli.ts",
+    "test": "tsx src/cli.ts list"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "viem": "^2.45.3"
+  },
+  "dependencies": {
+    "abitype": "^1.2.3",
+    "esbuild": "^0.27.3",
+    "eventemitter3": "^5.0.1",
+    "get-tsconfig": "^4.13.6",
+    "isows": "^1.0.7",
+    "ox": "^0.12.1",
+    "resolve-pkg-maps": "^1.0.0",
+    "ws": "^8.18.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
