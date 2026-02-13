@@ -148,6 +148,19 @@ importers:
         specifier: ^1.5.0
         version: 1.6.1(@types/node@20.19.33)
 
+  packages/liquidator:
+    dependencies:
+      viem:
+        specifier: ^2.10.0
+        version: 2.45.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+    devDependencies:
+      tsx:
+        specifier: ^4.7.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.4.0
+        version: 5.9.3
+
   packages/protocol-adapters:
     dependencies:
       '@katana-intent/shared':
@@ -7254,7 +7267,7 @@ snapshots:
       '@types/uuid': 8.3.4
       '@types/ws': 8.18.1
       buffer: 6.0.3
-      eventemitter3: 5.0.1
+      eventemitter3: 5.0.4
       uuid: 8.3.2
       ws: 8.19.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     optionalDependencies:
