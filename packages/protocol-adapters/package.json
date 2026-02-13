@@ -9,7 +9,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@katana-intent/shared": "*",
+    "@katana-intent/shared": "workspace:*",
     "viem": "^2.10.0"
   },
   "devDependencies": {

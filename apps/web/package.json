@@ -10,9 +10,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.24.0",
-    "@katana-intent/shared": "*",
-    "@katana-intent/intent-engine": "*",
-    "@katana-intent/protocol-adapters": "*",
+    "@katana-intent/shared": "workspace:*",
+    "@katana-intent/intent-engine": "workspace:*",
+    "@katana-intent/protocol-adapters": "workspace:*",
     "@rainbow-me/rainbowkit": "^2.1.0",
     "@tanstack/react-query": "^5.28.0",
     "class-variance-authority": "^0.7.0",

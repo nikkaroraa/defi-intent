@@ -21,7 +21,7 @@ interface ChainConfig {
   tokens: Record<string, { address: Address; decimals: number }>;
   dexes: Array<{
     name: string;
-    type: 'v2' | 'v3';
+    type: 'v2' | 'v3' | 'aerodrome';
     router: Address;
     quoter?: Address;
   }>;
@@ -351,7 +351,7 @@ async function getV3Quote(
   amountIn: bigint
 ): Promise<Quote | null> {
   const fees = [500, 3000, 10000]; // 0.05%, 0.3%, 1%
-  let bestOut = 0n;
+  let bestOut = BigInt(0);
   let bestFee = 3000;
 
   for (const fee of fees) {
@@ -360,7 +360,7 @@ async function getV3Quote(
         address: quoter,
         abi: V3_QUOTER_ABI,
         functionName: 'quoteExactInputSingle',
-        args: [fromAddr, toAddr, fee, amountIn, 0n],
+        args: [fromAddr, toAddr, fee, amountIn, BigInt(0)],
       });
       if (out > bestOut) {
         bestOut = out;
@@ -369,7 +369,7 @@ async function getV3Quote(
     } catch {}
   }
 
-  if (bestOut === 0n) return null;
+  if (bestOut === BigInt(0)) return null;
 
   return {
     dex: `${dexName} (${bestFee / 10000}%)`,
@@ -399,7 +399,7 @@ async function getAerodromeQuote(
         args: [amountIn, routes],
       });
       const amountOut = amounts[amounts.length - 1];
-      if (amountOut > 0n) {
+      if (amountOut > BigInt(0)) {
         return {
           dex: `${dexName} (${stable ? 'stable' : 'volatile'})`,
           amountOut,
@@ -425,7 +425,7 @@ async function getAerodromeQuote(
           args: [amountIn, routes],
         });
         const amountOut = amounts[amounts.length - 1];
-        if (amountOut > 0n) {
+        if (amountOut > BigInt(0)) {
           return {
             dex: `${dexName} (via WETH)`,
             amountOut,
@@ -500,7 +500,7 @@ export async function GET(request: NextRequest) {
     const best = quotes[0];
 
     // Calculate slippage
-    const amountOutMin = (best.amountOut * 995n) / 1000n;
+    const amountOutMin = (best.amountOut * BigInt(995)) / BigInt(1000);
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 1800);
 
     // Build transactions
@@ -536,7 +536,7 @@ export async function GET(request: NextRequest) {
         deadline,
         amountIn: amountInWei,
         amountOutMinimum: amountOutMin,
-        sqrtPriceLimitX96: 0n,
+        sqrtPriceLimitX96: BigInt(0),
       };
 
       txs.push({

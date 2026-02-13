@@ -45,7 +45,7 @@ export function parseAmountString(
   }
   
   if (normalized === 'half') {
-    return totalBalance / 2n;
+    return totalBalance / BigInt(2);
   }
   
   // Handle percentage
@@ -54,7 +54,7 @@ export function parseAmountString(
     if (isNaN(pct) || pct < 0 || pct > 100) {
       throw new Error('Invalid percentage');
     }
-    return (totalBalance * BigInt(Math.floor(pct * 100))) / 10000n;
+    return (totalBalance * BigInt(Math.floor(pct * 100))) / BigInt(10000);
   }
   
   // Handle direct number

@@ -8,9 +8,9 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@katana-intent/shared": "*",
-    "@katana-intent/intent-engine": "*",
-    "@katana-intent/protocol-adapters": "*",
+    "@katana-intent/shared": "workspace:*",
+    "@katana-intent/intent-engine": "workspace:*",
+    "@katana-intent/protocol-adapters": "workspace:*",
     "grammy": "^1.21.0",
     "viem": "^2.10.0"
   },

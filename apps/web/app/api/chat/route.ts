@@ -112,7 +112,7 @@ async function fetchBalances(walletAddress: Address) {
         args: [walletAddress],
       });
 
-      if (balance > 0n) {
+      if (balance > BigInt(0)) {
         balances.push({
           symbol: token.symbol,
           balance: balance.toString(),
