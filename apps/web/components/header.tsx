@@ -2,7 +2,7 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
-import { Sword, History, Settings, ArrowLeftRight, TrendingUp, Skull, Lock } from 'lucide-react';
+import { Sword, History, Settings, ArrowLeftRight, TrendingUp, Skull, Lock, Waves } from 'lucide-react';
 
 export function Header() {
   return (
@@ -44,6 +44,13 @@ export function Header() {
           >
             <Lock className="w-4 h-4" />
             Spectra
+          </Link>
+          <Link 
+            href="/hyperliquid" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            <Waves className="w-4 h-4" />
+            HLP
           </Link>
           <Link 
             href="/liquidator" 
