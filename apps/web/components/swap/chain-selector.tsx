@@ -15,6 +15,11 @@ const CHAINS: Chain[] = [
     logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
   },
   {
+    id: 8453,
+    name: 'Base',
+    logoURI: 'https://assets.coingecko.com/coins/images/31197/small/base.png',
+  },
+  {
     id: 747474,
     name: 'Katana',
     logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png', // Use ETH logo for now

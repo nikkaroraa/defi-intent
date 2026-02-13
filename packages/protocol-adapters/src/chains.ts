@@ -169,11 +169,94 @@ export const KATANA: ChainConfig = {
 };
 
 // ===========================================
+// BASE
+// ===========================================
+
+export const BASE: ChainConfig = {
+  id: 8453,
+  name: 'Base',
+  rpc: process.env.BASE_RPC_URL || 'https://mainnet.base.org',
+  explorer: 'https://basescan.org',
+  tokens: {
+    ETH: {
+      address: zeroAddress,
+      symbol: 'ETH',
+      decimals: 18,
+      name: 'Ether',
+      logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    },
+    WETH: {
+      address: '0x4200000000000000000000000000000000000006',
+      symbol: 'WETH',
+      decimals: 18,
+      name: 'Wrapped ETH',
+      logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
+    },
+    USDC: {
+      address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+      symbol: 'USDC',
+      decimals: 6,
+      name: 'USD Coin',
+      logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png',
+    },
+    USDbC: {
+      address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA',
+      symbol: 'USDbC',
+      decimals: 6,
+      name: 'USD Base Coin',
+      logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png',
+    },
+    DAI: {
+      address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',
+      symbol: 'DAI',
+      decimals: 18,
+      name: 'Dai Stablecoin',
+      logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png',
+    },
+    cbETH: {
+      address: '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22',
+      symbol: 'cbETH',
+      decimals: 18,
+      name: 'Coinbase Wrapped ETH',
+      logoURI: 'https://assets.coingecko.com/coins/images/27008/small/cbeth.png',
+    },
+  },
+  dexes: [
+    {
+      name: 'Aerodrome',
+      type: 'uniswap-v2', // Similar to V2 but with different interface
+      router: '0xcF77a3Ba9A5CA399B7c97c74d54e5b1Beb874E43',
+      factory: '0x420DD381b31aEf6683db6B902084cB0FFECe40Da',
+    },
+    {
+      name: 'Uniswap V2',
+      type: 'uniswap-v2',
+      router: '0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24',
+      factory: '0x8909Dc15e40173Ff4699343b6eB8132c65e18eC6',
+    },
+    {
+      name: 'Uniswap V3',
+      type: 'uniswap-v3',
+      router: '0x2626664c2603336E57B271c5C0b26F421741e481',
+      factory: '0x33128a8fC17869897dcE68Ed026d694621f6FDfD',
+      quoter: '0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a',
+    },
+    {
+      name: 'SushiSwap',
+      type: 'uniswap-v2',
+      router: '0x6BDED42c6DA8FBf0d2bA55B2fa120C5e0c8D7891',
+      factory: '0x71524B4f93c58fcbF659783284E38825f0622859',
+    },
+  ],
+};
+
+// ===========================================
 // CHAIN REGISTRY
 // ===========================================
 
 export const CHAINS: Record<number, ChainConfig> = {
   1: ETHEREUM,
+  8453: BASE,
   747474: KATANA,
 };
 

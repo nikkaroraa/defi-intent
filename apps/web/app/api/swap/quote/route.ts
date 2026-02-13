@@ -39,7 +39,6 @@ const CHAINS: Record<number, ChainConfig> = {
       USDC: { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6 },
       USDT: { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
       WBTC: { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
-      DAI: { address: '0x6B175474E89094C44Da98b954EesdeC B5BE', decimals: 18 },
     },
     dexes: [
       { name: 'Uniswap V2', type: 'v2', router: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D' },
@@ -50,6 +49,31 @@ const CHAINS: Record<number, ChainConfig> = {
         quoter: '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6',
       },
       { name: 'SushiSwap', type: 'v2', router: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F' },
+    ],
+  },
+  8453: {
+    id: 8453,
+    name: 'Base',
+    rpc: process.env.BASE_RPC_URL || 'https://mainnet.base.org',
+    weth: '0x4200000000000000000000000000000000000006',
+    tokens: {
+      ETH: { address: zeroAddress, decimals: 18 },
+      WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18 },
+      USDC: { address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', decimals: 6 },
+      USDbC: { address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA', decimals: 6 },
+      DAI: { address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', decimals: 18 },
+      cbETH: { address: '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22', decimals: 18 },
+    },
+    dexes: [
+      { name: 'Aerodrome', type: 'aerodrome', router: '0xcF77a3Ba9A5CA399B7c97c74d54e5b1Beb874E43' },
+      { name: 'Uniswap V2', type: 'v2', router: '0x4752ba5DBc23f44D87826276BF6Fd6b1C372aD24' },
+      {
+        name: 'Uniswap V3',
+        type: 'v3',
+        router: '0x2626664c2603336E57B271c5C0b26F421741e481',
+        quoter: '0x3d4e44Eb1374240CE5F1B871ab261CD16335B76a',
+      },
+      { name: 'SushiSwap', type: 'v2', router: '0x6BDED42c6DA8FBf0d2bA55B2fa120C5e0c8D7891' },
     ],
   },
   747474: {
@@ -177,6 +201,96 @@ const ERC20_ABI = [
   },
 ] as const;
 
+// Aerodrome Router ABI (ve(3,3) style)
+const AERODROME_ROUTER_ABI = [
+  {
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      {
+        components: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'stable', type: 'bool' },
+          { name: 'factory', type: 'address' },
+        ],
+        name: 'routes',
+        type: 'tuple[]',
+      },
+    ],
+    name: 'getAmountsOut',
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'amountOutMin', type: 'uint256' },
+      {
+        components: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'stable', type: 'bool' },
+          { name: 'factory', type: 'address' },
+        ],
+        name: 'routes',
+        type: 'tuple[]',
+      },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+    name: 'swapExactTokensForTokens',
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'amountOutMin', type: 'uint256' },
+      {
+        components: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'stable', type: 'bool' },
+          { name: 'factory', type: 'address' },
+        ],
+        name: 'routes',
+        type: 'tuple[]',
+      },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+    name: 'swapExactETHForTokens',
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'amountOutMin', type: 'uint256' },
+      {
+        components: [
+          { name: 'from', type: 'address' },
+          { name: 'to', type: 'address' },
+          { name: 'stable', type: 'bool' },
+          { name: 'factory', type: 'address' },
+        ],
+        name: 'routes',
+        type: 'tuple[]',
+      },
+      { name: 'to', type: 'address' },
+      { name: 'deadline', type: 'uint256' },
+    ],
+    name: 'swapExactTokensForETH',
+    outputs: [{ name: 'amounts', type: 'uint256[]' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
+
+const AERODROME_FACTORY = '0x420DD381b31aEf6683db6B902084cB0FFECe40Da' as Address;
+
 // ===========================================
 // QUOTE FETCHERS
 // ===========================================
@@ -186,6 +300,7 @@ interface Quote {
   amountOut: bigint;
   path: Address[];
   fee?: number;
+  stable?: boolean; // For Aerodrome
 }
 
 async function getV2Quote(
@@ -264,6 +379,67 @@ async function getV3Quote(
   };
 }
 
+async function getAerodromeQuote(
+  client: ReturnType<typeof createPublicClient>,
+  router: Address,
+  dexName: string,
+  fromAddr: Address,
+  toAddr: Address,
+  weth: Address,
+  amountIn: bigint
+): Promise<Quote | null> {
+  // Try both stable and volatile pools
+  for (const stable of [false, true]) {
+    try {
+      const routes = [{ from: fromAddr, to: toAddr, stable, factory: AERODROME_FACTORY }];
+      const amounts = await client.readContract({
+        address: router,
+        abi: AERODROME_ROUTER_ABI,
+        functionName: 'getAmountsOut',
+        args: [amountIn, routes],
+      });
+      const amountOut = amounts[amounts.length - 1];
+      if (amountOut > 0n) {
+        return {
+          dex: `${dexName} (${stable ? 'stable' : 'volatile'})`,
+          amountOut,
+          path: [fromAddr, toAddr],
+          stable,
+        };
+      }
+    } catch {}
+  }
+
+  // Try via WETH
+  if (fromAddr !== weth && toAddr !== weth) {
+    for (const stable of [false, true]) {
+      try {
+        const routes = [
+          { from: fromAddr, to: weth, stable: false, factory: AERODROME_FACTORY },
+          { from: weth, to: toAddr, stable, factory: AERODROME_FACTORY },
+        ];
+        const amounts = await client.readContract({
+          address: router,
+          abi: AERODROME_ROUTER_ABI,
+          functionName: 'getAmountsOut',
+          args: [amountIn, routes],
+        });
+        const amountOut = amounts[amounts.length - 1];
+        if (amountOut > 0n) {
+          return {
+            dex: `${dexName} (via WETH)`,
+            amountOut,
+            path: [fromAddr, weth, toAddr],
+            stable,
+          };
+        }
+      } catch {}
+    }
+  }
+
+  return null;
+}
+
 // ===========================================
 // HANDLER
 // ===========================================
@@ -306,6 +482,8 @@ export async function GET(request: NextRequest) {
         return getV2Quote(client, dex.router, dex.name, fromAddr, toAddr, chain.weth, amountInWei);
       } else if (dex.type === 'v3' && dex.quoter) {
         return getV3Quote(client, dex.quoter, dex.name, fromAddr, toAddr, amountInWei);
+      } else if (dex.type === 'aerodrome') {
+        return getAerodromeQuote(client, dex.router, dex.name, fromAddr, toAddr, chain.weth, amountInWei);
       }
       return null;
     });
@@ -370,6 +548,64 @@ export async function GET(request: NextRequest) {
         }),
         value: isETHIn ? amountInWei.toString() : '0',
       });
+    } else if (best.stable !== undefined) {
+      // Aerodrome swap
+      const routes = best.path.length === 2
+        ? [{ from: best.path[0], to: best.path[1], stable: best.stable, factory: AERODROME_FACTORY }]
+        : [
+            { from: best.path[0], to: best.path[1], stable: false, factory: AERODROME_FACTORY },
+            { from: best.path[1], to: best.path[2], stable: best.stable, factory: AERODROME_FACTORY },
+          ];
+
+      if (isETHIn) {
+        txs.push({
+          to: dexConfig.router,
+          data: encodeFunctionData({
+            abi: AERODROME_ROUTER_ABI,
+            functionName: 'swapExactETHForTokens',
+            args: [amountOutMin, routes, recipient, deadline],
+          }),
+          value: amountInWei.toString(),
+        });
+      } else if (isETHOut) {
+        txs.push({
+          to: tokenIn.address,
+          data: encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [dexConfig.router, amountInWei],
+          }),
+          value: '0',
+        });
+        txs.push({
+          to: dexConfig.router,
+          data: encodeFunctionData({
+            abi: AERODROME_ROUTER_ABI,
+            functionName: 'swapExactTokensForETH',
+            args: [amountInWei, amountOutMin, routes, recipient, deadline],
+          }),
+          value: '0',
+        });
+      } else {
+        txs.push({
+          to: tokenIn.address,
+          data: encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [dexConfig.router, amountInWei],
+          }),
+          value: '0',
+        });
+        txs.push({
+          to: dexConfig.router,
+          data: encodeFunctionData({
+            abi: AERODROME_ROUTER_ABI,
+            functionName: 'swapExactTokensForTokens',
+            args: [amountInWei, amountOutMin, routes, recipient, deadline],
+          }),
+          value: '0',
+        });
+      }
     } else {
       // V2 swap
       if (isETHIn) {

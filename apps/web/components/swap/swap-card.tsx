@@ -18,6 +18,14 @@ const TOKENS_BY_CHAIN: Record<number, Token[]> = {
     { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', symbol: 'USDT', decimals: 6, name: 'Tether', logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png' },
     { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', symbol: 'WBTC', decimals: 8, name: 'Wrapped BTC', logoURI: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png' },
   ],
+  8453: [
+    { address: '0x0000000000000000000000000000000000000000', symbol: 'ETH', decimals: 18, name: 'Ether', logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+    { address: '0x4200000000000000000000000000000000000006', symbol: 'WETH', decimals: 18, name: 'Wrapped ETH', logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png' },
+    { address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', symbol: 'USDC', decimals: 6, name: 'USD Coin', logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png' },
+    { address: '0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA', symbol: 'USDbC', decimals: 6, name: 'USD Base Coin', logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png' },
+    { address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb', symbol: 'DAI', decimals: 18, name: 'Dai', logoURI: 'https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png' },
+    { address: '0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22', symbol: 'cbETH', decimals: 18, name: 'Coinbase ETH', logoURI: 'https://assets.coingecko.com/coins/images/27008/small/cbeth.png' },
+  ],
   747474: [
     { address: '0x0000000000000000000000000000000000000000', symbol: 'ETH', decimals: 18, name: 'Ether', logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
     { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', symbol: 'WETH', decimals: 18, name: 'Wrapped ETH', logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png' },
