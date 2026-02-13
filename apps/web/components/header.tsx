@@ -2,7 +2,7 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import Link from 'next/link';
-import { Sword, History, Settings, ArrowLeftRight, TrendingUp, Skull } from 'lucide-react';
+import { Sword, History, Settings, ArrowLeftRight, TrendingUp, Skull, Lock } from 'lucide-react';
 
 export function Header() {
   return (
@@ -37,6 +37,13 @@ export function Header() {
           >
             <TrendingUp className="w-4 h-4" />
             Yields
+          </Link>
+          <Link 
+            href="/spectra" 
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            <Lock className="w-4 h-4" />
+            Spectra
           </Link>
           <Link 
             href="/liquidator" 
