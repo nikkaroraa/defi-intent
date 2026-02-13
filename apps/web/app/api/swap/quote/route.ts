@@ -10,25 +10,62 @@ import {
 } from 'viem';
 
 // ===========================================
-// CONFIG
+// CHAIN CONFIGS
 // ===========================================
 
-const katana = {
-  id: 747474,
-  name: 'Katana',
-  nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-  rpcUrls: { default: { http: ['https://rpc.katana.network'] } },
-} as const;
+interface ChainConfig {
+  id: number;
+  name: string;
+  rpc: string;
+  weth: Address;
+  tokens: Record<string, { address: Address; decimals: number }>;
+  dexes: Array<{
+    name: string;
+    type: 'v2' | 'v3';
+    router: Address;
+    quoter?: Address;
+  }>;
+}
 
-const SUSHI_V2_ROUTER = '0x69cc349932ae18ed406eeb917d79b9b3033fb68e' as Address;
-const WETH = '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62' as Address;
-
-const TOKENS: Record<string, { address: Address; decimals: number }> = {
-  ETH: { address: zeroAddress, decimals: 18 },
-  WETH: { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', decimals: 18 },
-  USDC: { address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36', decimals: 6 },
-  USDT: { address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2', decimals: 6 },
-  WBTC: { address: '0x0913da6da4b42f538b445599b46bb4622342cf52', decimals: 8 },
+const CHAINS: Record<number, ChainConfig> = {
+  1: {
+    id: 1,
+    name: 'Ethereum',
+    rpc: process.env.ETH_RPC_URL || 'https://eth.llamarpc.com',
+    weth: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    tokens: {
+      ETH: { address: zeroAddress, decimals: 18 },
+      WETH: { address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', decimals: 18 },
+      USDC: { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6 },
+      USDT: { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6 },
+      WBTC: { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8 },
+      DAI: { address: '0x6B175474E89094C44Da98b954EesdeC B5BE', decimals: 18 },
+    },
+    dexes: [
+      { name: 'Uniswap V2', type: 'v2', router: '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D' },
+      {
+        name: 'Uniswap V3',
+        type: 'v3',
+        router: '0xE592427A0AEce92De3Edee1F18E0157C05861564',
+        quoter: '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6',
+      },
+      { name: 'SushiSwap', type: 'v2', router: '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F' },
+    ],
+  },
+  747474: {
+    id: 747474,
+    name: 'Katana',
+    rpc: process.env.KATANA_RPC_URL || 'https://rpc.katana.network',
+    weth: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62',
+    tokens: {
+      ETH: { address: zeroAddress, decimals: 18 },
+      WETH: { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', decimals: 18 },
+      USDC: { address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36', decimals: 6 },
+      USDT: { address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2', decimals: 6 },
+      WBTC: { address: '0x0913da6da4b42f538b445599b46bb4622342cf52', decimals: 8 },
+    },
+    dexes: [{ name: 'Sushi V2', type: 'v2', router: '0x69cc349932ae18ed406eeb917d79b9b3033fb68e' }],
+  },
 };
 
 // ===========================================
@@ -86,6 +123,47 @@ const V2_ROUTER_ABI = [
   },
 ] as const;
 
+const V3_QUOTER_ABI = [
+  {
+    inputs: [
+      { name: 'tokenIn', type: 'address' },
+      { name: 'tokenOut', type: 'address' },
+      { name: 'fee', type: 'uint24' },
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'sqrtPriceLimitX96', type: 'uint160' },
+    ],
+    name: 'quoteExactInputSingle',
+    outputs: [{ name: 'amountOut', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
+
+const V3_ROUTER_ABI = [
+  {
+    inputs: [
+      {
+        components: [
+          { name: 'tokenIn', type: 'address' },
+          { name: 'tokenOut', type: 'address' },
+          { name: 'fee', type: 'uint24' },
+          { name: 'recipient', type: 'address' },
+          { name: 'deadline', type: 'uint256' },
+          { name: 'amountIn', type: 'uint256' },
+          { name: 'amountOutMinimum', type: 'uint256' },
+          { name: 'sqrtPriceLimitX96', type: 'uint160' },
+        ],
+        name: 'params',
+        type: 'tuple',
+      },
+    ],
+    name: 'exactInputSingle',
+    outputs: [{ name: 'amountOut', type: 'uint256' }],
+    stateMutability: 'payable',
+    type: 'function',
+  },
+] as const;
+
 const ERC20_ABI = [
   {
     inputs: [
@@ -100,11 +178,99 @@ const ERC20_ABI = [
 ] as const;
 
 // ===========================================
+// QUOTE FETCHERS
+// ===========================================
+
+interface Quote {
+  dex: string;
+  amountOut: bigint;
+  path: Address[];
+  fee?: number;
+}
+
+async function getV2Quote(
+  client: ReturnType<typeof createPublicClient>,
+  router: Address,
+  dexName: string,
+  fromAddr: Address,
+  toAddr: Address,
+  weth: Address,
+  amountIn: bigint
+): Promise<Quote | null> {
+  let path: Address[] = [fromAddr, toAddr];
+
+  try {
+    const amounts = await client.readContract({
+      address: router,
+      abi: V2_ROUTER_ABI,
+      functionName: 'getAmountsOut',
+      args: [amountIn, path],
+    });
+    return { dex: dexName, amountOut: amounts[amounts.length - 1], path };
+  } catch {
+    // Try via WETH
+    if (fromAddr !== weth && toAddr !== weth) {
+      try {
+        path = [fromAddr, weth, toAddr];
+        const amounts = await client.readContract({
+          address: router,
+          abi: V2_ROUTER_ABI,
+          functionName: 'getAmountsOut',
+          args: [amountIn, path],
+        });
+        return { dex: dexName, amountOut: amounts[amounts.length - 1], path };
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
+async function getV3Quote(
+  client: ReturnType<typeof createPublicClient>,
+  quoter: Address,
+  dexName: string,
+  fromAddr: Address,
+  toAddr: Address,
+  amountIn: bigint
+): Promise<Quote | null> {
+  const fees = [500, 3000, 10000]; // 0.05%, 0.3%, 1%
+  let bestOut = 0n;
+  let bestFee = 3000;
+
+  for (const fee of fees) {
+    try {
+      const out = await client.readContract({
+        address: quoter,
+        abi: V3_QUOTER_ABI,
+        functionName: 'quoteExactInputSingle',
+        args: [fromAddr, toAddr, fee, amountIn, 0n],
+      });
+      if (out > bestOut) {
+        bestOut = out;
+        bestFee = fee;
+      }
+    } catch {}
+  }
+
+  if (bestOut === 0n) return null;
+
+  return {
+    dex: `${dexName} (${bestFee / 10000}%)`,
+    amountOut: bestOut,
+    path: [fromAddr, toAddr],
+    fee: bestFee,
+  };
+}
+
+// ===========================================
 // HANDLER
 // ===========================================
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const chainId = parseInt(searchParams.get('chainId') || '747474');
   const tokenInSymbol = searchParams.get('tokenIn')?.toUpperCase();
   const tokenOutSymbol = searchParams.get('tokenOut')?.toUpperCase();
   const amount = searchParams.get('amount');
@@ -114,55 +280,49 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
   }
 
-  const tokenIn = TOKENS[tokenInSymbol];
-  const tokenOut = TOKENS[tokenOutSymbol];
+  const chain = CHAINS[chainId];
+  if (!chain) {
+    return NextResponse.json({ error: 'Unsupported chain' }, { status: 400 });
+  }
 
+  const tokenIn = chain.tokens[tokenInSymbol];
+  const tokenOut = chain.tokens[tokenOutSymbol];
   if (!tokenIn || !tokenOut) {
     return NextResponse.json({ error: 'Unknown token' }, { status: 400 });
   }
 
   try {
     const client = createPublicClient({
-      chain: katana,
-      transport: http('https://rpc.katana.network'),
+      transport: http(chain.rpc, { timeout: 15000 }),
     });
 
     const amountInWei = parseUnits(amount, tokenIn.decimals);
+    const fromAddr = tokenIn.address === zeroAddress ? chain.weth : tokenIn.address;
+    const toAddr = tokenOut.address === zeroAddress ? chain.weth : tokenOut.address;
 
-    // Build path - normalize ETH to WETH for routing
-    const fromAddress = tokenIn.address === zeroAddress ? WETH : tokenIn.address;
-    const toAddress = tokenOut.address === zeroAddress ? WETH : tokenOut.address;
-
-    // Try direct path, then via WETH
-    let path: Address[];
-    let amountOut: bigint;
-
-    try {
-      path = [fromAddress, toAddress];
-      const amounts = await client.readContract({
-        address: SUSHI_V2_ROUTER,
-        abi: V2_ROUTER_ABI,
-        functionName: 'getAmountsOut',
-        args: [amountInWei, path],
-      });
-      amountOut = amounts[amounts.length - 1];
-    } catch {
-      if (fromAddress !== WETH && toAddress !== WETH) {
-        path = [fromAddress, WETH, toAddress];
-        const amounts = await client.readContract({
-          address: SUSHI_V2_ROUTER,
-          abi: V2_ROUTER_ABI,
-          functionName: 'getAmountsOut',
-          args: [amountInWei, path],
-        });
-        amountOut = amounts[amounts.length - 1];
-      } else {
-        return NextResponse.json({ error: 'No route found' }, { status: 404 });
+    // Get quotes from all DEXs
+    const quotePromises = chain.dexes.map(async (dex) => {
+      if (dex.type === 'v2') {
+        return getV2Quote(client, dex.router, dex.name, fromAddr, toAddr, chain.weth, amountInWei);
+      } else if (dex.type === 'v3' && dex.quoter) {
+        return getV3Quote(client, dex.quoter, dex.name, fromAddr, toAddr, amountInWei);
       }
+      return null;
+    });
+
+    const results = await Promise.all(quotePromises);
+    const quotes = results.filter((q): q is Quote => q !== null);
+
+    if (quotes.length === 0) {
+      return NextResponse.json({ error: 'No route found' }, { status: 404 });
     }
 
-    // Calculate slippage (0.5%)
-    const amountOutMin = (amountOut * 995n) / 1000n;
+    // Sort by amountOut
+    quotes.sort((a, b) => (b.amountOut > a.amountOut ? 1 : -1));
+    const best = quotes[0];
+
+    // Calculate slippage
+    const amountOutMin = (best.amountOut * 995n) / 1000n;
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 1800);
 
     // Build transactions
@@ -170,66 +330,130 @@ export async function GET(request: NextRequest) {
     const isETHIn = tokenIn.address === zeroAddress;
     const isETHOut = tokenOut.address === zeroAddress;
 
-    if (isETHIn) {
-      // ETH → Token
-      const data = encodeFunctionData({
-        abi: V2_ROUTER_ABI,
-        functionName: 'swapExactETHForTokens',
-        args: [amountOutMin, path, recipient, deadline],
-      });
-      txs.push({ to: SUSHI_V2_ROUTER, data, value: amountInWei.toString() });
-    } else if (isETHOut) {
-      // Token → ETH (approve + swap)
-      const approveData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: 'approve',
-        args: [SUSHI_V2_ROUTER, amountInWei],
-      });
-      txs.push({ to: tokenIn.address, data: approveData, value: '0' });
+    // Find the dex config
+    const dexConfig = chain.dexes.find((d) => best.dex.startsWith(d.name));
+    if (!dexConfig) {
+      return NextResponse.json({ error: 'DEX config not found' }, { status: 500 });
+    }
 
-      const swapData = encodeFunctionData({
-        abi: V2_ROUTER_ABI,
-        functionName: 'swapExactTokensForETH',
-        args: [amountInWei, amountOutMin, path, recipient, deadline],
+    if (best.fee) {
+      // V3 swap
+      if (!isETHIn) {
+        txs.push({
+          to: tokenIn.address,
+          data: encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [dexConfig.router, amountInWei],
+          }),
+          value: '0',
+        });
+      }
+
+      const params = {
+        tokenIn: fromAddr,
+        tokenOut: toAddr,
+        fee: best.fee,
+        recipient,
+        deadline,
+        amountIn: amountInWei,
+        amountOutMinimum: amountOutMin,
+        sqrtPriceLimitX96: 0n,
+      };
+
+      txs.push({
+        to: dexConfig.router,
+        data: encodeFunctionData({
+          abi: V3_ROUTER_ABI,
+          functionName: 'exactInputSingle',
+          args: [params],
+        }),
+        value: isETHIn ? amountInWei.toString() : '0',
       });
-      txs.push({ to: SUSHI_V2_ROUTER, data: swapData, value: '0' });
     } else {
-      // Token → Token (approve + swap)
-      const approveData = encodeFunctionData({
-        abi: ERC20_ABI,
-        functionName: 'approve',
-        args: [SUSHI_V2_ROUTER, amountInWei],
-      });
-      txs.push({ to: tokenIn.address, data: approveData, value: '0' });
-
-      const swapData = encodeFunctionData({
-        abi: V2_ROUTER_ABI,
-        functionName: 'swapExactTokensForTokens',
-        args: [amountInWei, amountOutMin, path, recipient, deadline],
-      });
-      txs.push({ to: SUSHI_V2_ROUTER, data: swapData, value: '0' });
+      // V2 swap
+      if (isETHIn) {
+        txs.push({
+          to: dexConfig.router,
+          data: encodeFunctionData({
+            abi: V2_ROUTER_ABI,
+            functionName: 'swapExactETHForTokens',
+            args: [amountOutMin, best.path, recipient, deadline],
+          }),
+          value: amountInWei.toString(),
+        });
+      } else if (isETHOut) {
+        txs.push({
+          to: tokenIn.address,
+          data: encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [dexConfig.router, amountInWei],
+          }),
+          value: '0',
+        });
+        txs.push({
+          to: dexConfig.router,
+          data: encodeFunctionData({
+            abi: V2_ROUTER_ABI,
+            functionName: 'swapExactTokensForETH',
+            args: [amountInWei, amountOutMin, best.path, recipient, deadline],
+          }),
+          value: '0',
+        });
+      } else {
+        txs.push({
+          to: tokenIn.address,
+          data: encodeFunctionData({
+            abi: ERC20_ABI,
+            functionName: 'approve',
+            args: [dexConfig.router, amountInWei],
+          }),
+          value: '0',
+        });
+        txs.push({
+          to: dexConfig.router,
+          data: encodeFunctionData({
+            abi: V2_ROUTER_ABI,
+            functionName: 'swapExactTokensForTokens',
+            args: [amountInWei, amountOutMin, best.path, recipient, deadline],
+          }),
+          value: '0',
+        });
+      }
     }
 
     // Build route string
-    const routeSymbols = path.map((addr) => {
-      const entry = Object.entries(TOKENS).find(
-        ([, t]) => t.address.toLowerCase() === addr.toLowerCase()
-      );
-      return entry ? entry[0] : addr.slice(0, 6);
-    });
-
-    // If swapping ETH, show ETH in route
-    if (isETHIn) routeSymbols[0] = 'ETH';
-    if (isETHOut) routeSymbols[routeSymbols.length - 1] = 'ETH';
+    let route: string;
+    if (best.fee) {
+      route = `${tokenInSymbol} → ${tokenOutSymbol} (${best.dex})`;
+    } else {
+      const symbols = best.path.map((addr) => {
+        if (addr === zeroAddress) return 'ETH';
+        const entry = Object.entries(chain.tokens).find(
+          ([, t]) => t.address.toLowerCase() === addr.toLowerCase()
+        );
+        return entry ? entry[0] : addr.slice(0, 6);
+      });
+      if (isETHIn) symbols[0] = 'ETH';
+      if (isETHOut) symbols[symbols.length - 1] = 'ETH';
+      route = symbols.join(' → ') + ` (${best.dex})`;
+    }
 
     return NextResponse.json({
+      chainId,
       tokenIn: { symbol: tokenInSymbol, decimals: tokenIn.decimals },
       tokenOut: { symbol: tokenOutSymbol, decimals: tokenOut.decimals },
       amountIn: formatUnits(amountInWei, tokenIn.decimals),
-      amountOut: formatUnits(amountOut, tokenOut.decimals),
+      amountOut: formatUnits(best.amountOut, tokenOut.decimals),
       amountOutMin: formatUnits(amountOutMin, tokenOut.decimals),
-      route: routeSymbols.join(' → '),
-      priceImpact: 0.3, // Simplified
+      route,
+      dex: best.dex,
+      priceImpact: best.fee ? best.fee / 10000 : 0.3,
+      allQuotes: quotes.map((q) => ({
+        dex: q.dex,
+        amountOut: formatUnits(q.amountOut, tokenOut.decimals),
+      })),
       txs,
     });
   } catch (e: any) {

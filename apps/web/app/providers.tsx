@@ -29,11 +29,11 @@ const katana = {
 const config = getDefaultConfig({
   appName: 'Katana Intent',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo',
-  chains: [base, katana, mainnet],
+  chains: [mainnet, katana, base],
   transports: {
-    [base.id]: http(),
+    [mainnet.id]: http(process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://eth.llamarpc.com'),
     [katana.id]: http('https://rpc.katana.network'),
-    [mainnet.id]: http(),
+    [base.id]: http(),
   },
   ssr: true,
 });

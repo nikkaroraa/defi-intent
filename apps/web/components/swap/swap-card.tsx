@@ -1,30 +1,52 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useBalance, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
-import { parseUnits, formatUnits, type Address, type Hex } from 'viem';
-import { TokenSelector, TOKENS, type Token } from './token-selector';
+import { useAccount, useBalance, useSendTransaction, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
+import { formatUnits, type Address, type Hex } from 'viem';
+import { TokenSelector, type Token } from './token-selector';
+import { ChainSelector, CHAINS, type Chain } from './chain-selector';
 
 // ===========================================
-// SWAP API
+// TOKENS BY CHAIN
+// ===========================================
+
+const TOKENS_BY_CHAIN: Record<number, Token[]> = {
+  1: [
+    { address: '0x0000000000000000000000000000000000000000', symbol: 'ETH', decimals: 18, name: 'Ether', logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+    { address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', symbol: 'WETH', decimals: 18, name: 'Wrapped ETH', logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png' },
+    { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', decimals: 6, name: 'USD Coin', logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png' },
+    { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', symbol: 'USDT', decimals: 6, name: 'Tether', logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png' },
+    { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', symbol: 'WBTC', decimals: 8, name: 'Wrapped BTC', logoURI: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png' },
+  ],
+  747474: [
+    { address: '0x0000000000000000000000000000000000000000', symbol: 'ETH', decimals: 18, name: 'Ether', logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png' },
+    { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', symbol: 'WETH', decimals: 18, name: 'Wrapped ETH', logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png' },
+    { address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36', symbol: 'USDC', decimals: 6, name: 'USD Coin', logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png' },
+    { address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2', symbol: 'USDT', decimals: 6, name: 'Tether', logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png' },
+    { address: '0x0913da6da4b42f538b445599b46bb4622342cf52', symbol: 'WBTC', decimals: 8, name: 'Wrapped BTC', logoURI: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png' },
+  ],
+};
+
+// ===========================================
+// TYPES
 // ===========================================
 
 interface SwapQuote {
-  tokenIn: Token;
-  tokenOut: Token;
+  chainId: number;
+  tokenIn: { symbol: string; decimals: number };
+  tokenOut: { symbol: string; decimals: number };
   amountIn: string;
   amountOut: string;
   amountOutMin: string;
   route: string;
+  dex: string;
   priceImpact: number;
-  txs: Array<{
-    to: Address;
-    data: Hex;
-    value: string;
-  }>;
+  allQuotes: Array<{ dex: string; amountOut: string }>;
+  txs: Array<{ to: Address; data: Hex; value: string }>;
 }
 
 async function fetchQuote(
+  chainId: number,
   tokenIn: string,
   tokenOut: string,
   amount: string,
@@ -32,7 +54,7 @@ async function fetchQuote(
 ): Promise<SwapQuote | null> {
   try {
     const res = await fetch(
-      `/api/swap/quote?tokenIn=${tokenIn}&tokenOut=${tokenOut}&amount=${amount}&recipient=${recipient}`
+      `/api/swap/quote?chainId=${chainId}&tokenIn=${tokenIn}&tokenOut=${tokenOut}&amount=${amount}&recipient=${recipient}`
     );
     if (!res.ok) return null;
     return res.json();
@@ -46,27 +68,43 @@ async function fetchQuote(
 // ===========================================
 
 export function SwapCard() {
-  const { address, isConnected } = useAccount();
-  const [tokenIn, setTokenIn] = useState<Token | null>(TOKENS[0]); // ETH
-  const [tokenOut, setTokenOut] = useState<Token | null>(TOKENS[2]); // USDC
+  const { address, isConnected, chainId: walletChainId } = useAccount();
+  const { switchChain } = useSwitchChain();
+
+  const [selectedChain, setSelectedChain] = useState<Chain>(CHAINS[1]); // Default to Katana
+  const [tokenIn, setTokenIn] = useState<Token | null>(null);
+  const [tokenOut, setTokenOut] = useState<Token | null>(null);
   const [amountIn, setAmountIn] = useState('');
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Get tokens for selected chain
+  const tokens = TOKENS_BY_CHAIN[selectedChain.id] || [];
+
+  // Initialize tokens when chain changes
+  useEffect(() => {
+    const chainTokens = TOKENS_BY_CHAIN[selectedChain.id];
+    if (chainTokens) {
+      setTokenIn(chainTokens[0]); // ETH
+      setTokenOut(chainTokens[2]); // USDC
+      setQuote(null);
+      setAmountIn('');
+    }
+  }, [selectedChain.id]);
+
   // Get balance
   const { data: balance } = useBalance({
     address,
-    token: tokenIn?.address === '0x0000000000000000000000000000000000000000' 
-      ? undefined 
+    token: tokenIn?.address === '0x0000000000000000000000000000000000000000'
+      ? undefined
       : tokenIn?.address as Address,
+    chainId: selectedChain.id,
   });
 
   // Transaction state
   const { sendTransaction, data: txHash, isPending: isSending } = useSendTransaction();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
-    hash: txHash,
-  });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
   // Fetch quote when inputs change
   useEffect(() => {
@@ -79,7 +117,7 @@ export function SwapCard() {
       setIsLoading(true);
       setError(null);
 
-      const q = await fetchQuote(tokenIn.symbol, tokenOut.symbol, amountIn, address);
+      const q = await fetchQuote(selectedChain.id, tokenIn.symbol, tokenOut.symbol, amountIn, address);
 
       if (q) {
         setQuote(q);
@@ -93,7 +131,7 @@ export function SwapCard() {
 
     const debounce = setTimeout(getQuote, 500);
     return () => clearTimeout(debounce);
-  }, [tokenIn, tokenOut, amountIn, address]);
+  }, [tokenIn, tokenOut, amountIn, address, selectedChain.id]);
 
   // Switch tokens
   const switchTokens = () => {
@@ -103,14 +141,29 @@ export function SwapCard() {
     setQuote(null);
   };
 
+  // Handle chain change
+  const handleChainChange = (chain: Chain) => {
+    setSelectedChain(chain);
+    // Also switch wallet chain
+    if (switchChain && walletChainId !== chain.id) {
+      switchChain({ chainId: chain.id });
+    }
+  };
+
   // Execute swap
   const handleSwap = async () => {
     if (!quote || !quote.txs.length) return;
 
-    // For now, execute first tx (approve or swap)
-    // TODO: Handle multiple txs with bundler
-    const tx = quote.txs[quote.txs.length - 1]; // Get the swap tx
+    // Check if wallet is on correct chain
+    if (walletChainId !== selectedChain.id) {
+      if (switchChain) {
+        switchChain({ chainId: selectedChain.id });
+      }
+      return;
+    }
 
+    // Execute the swap tx (last one in the array)
+    const tx = quote.txs[quote.txs.length - 1];
     sendTransaction({
       to: tx.to,
       data: tx.data,
@@ -125,17 +178,14 @@ export function SwapCard() {
     }
   };
 
+  const needsChainSwitch = walletChainId !== selectedChain.id;
+
   return (
     <div className="w-full max-w-md mx-auto">
       <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Swap</h2>
-          <button className="p-2 hover:bg-gray-800 rounded-lg transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          </button>
+          <ChainSelector selectedChain={selectedChain} onSelect={handleChainChange} />
         </div>
 
         {/* From */}
@@ -157,9 +207,9 @@ export function SwapCard() {
               className="flex-1 bg-transparent text-2xl font-medium outline-none"
             />
             <TokenSelector
+              tokens={tokens}
               selectedToken={tokenIn}
               onSelect={setTokenIn}
-              label=""
               excludeToken={tokenOut}
             />
           </div>
@@ -193,9 +243,9 @@ export function SwapCard() {
               )}
             </div>
             <TokenSelector
+              tokens={tokens}
               selectedToken={tokenOut}
               onSelect={setTokenOut}
-              label=""
               excludeToken={tokenIn}
             />
           </div>
@@ -209,12 +259,21 @@ export function SwapCard() {
               <span className="text-white">{quote.route}</span>
             </div>
             <div className="flex justify-between text-gray-400 mt-1">
-              <span>Price Impact</span>
-              <span className={quote.priceImpact > 1 ? 'text-red-400' : 'text-green-400'}>
-                ~{quote.priceImpact.toFixed(2)}%
-              </span>
+              <span>Best DEX</span>
+              <span className="text-green-400">{quote.dex}</span>
             </div>
-            <div className="flex justify-between text-gray-400 mt-1">
+            {quote.allQuotes.length > 1 && (
+              <div className="mt-2 pt-2 border-t border-gray-700">
+                <span className="text-gray-500 text-xs">All quotes:</span>
+                {quote.allQuotes.map((q, i) => (
+                  <div key={i} className="flex justify-between text-gray-400 text-xs mt-1">
+                    <span>{q.dex}</span>
+                    <span>{parseFloat(q.amountOut).toFixed(6)} {tokenOut?.symbol}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex justify-between text-gray-400 mt-2">
               <span>Min. received</span>
               <span className="text-white">{parseFloat(quote.amountOutMin).toFixed(6)} {tokenOut?.symbol}</span>
             </div>
@@ -238,11 +297,13 @@ export function SwapCard() {
         {/* Swap button */}
         <button
           onClick={handleSwap}
-          disabled={!isConnected || !quote || isSending || isConfirming}
+          disabled={!isConnected || (!quote && !needsChainSwitch) || isSending || isConfirming}
           className="w-full mt-4 py-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-500 hover:to-pink-500 transition-all"
         >
           {!isConnected
             ? 'Connect Wallet'
+            : needsChainSwitch
+            ? `Switch to ${selectedChain.name}`
             : isSending
             ? 'Confirm in Wallet...'
             : isConfirming

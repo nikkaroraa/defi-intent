@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 
 export interface Token {
   address: string;
@@ -11,68 +10,29 @@ export interface Token {
   logoURI?: string;
 }
 
-const TOKENS: Token[] = [
-  {
-    address: '0x0000000000000000000000000000000000000000',
-    symbol: 'ETH',
-    decimals: 18,
-    name: 'Ether',
-    logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
-  },
-  {
-    address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62',
-    symbol: 'WETH',
-    decimals: 18,
-    name: 'Wrapped ETH',
-    logoURI: 'https://assets.coingecko.com/coins/images/2518/small/weth.png',
-  },
-  {
-    address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36',
-    symbol: 'USDC',
-    decimals: 6,
-    name: 'USD Coin',
-    logoURI: 'https://assets.coingecko.com/coins/images/6319/small/usdc.png',
-  },
-  {
-    address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2',
-    symbol: 'USDT',
-    decimals: 6,
-    name: 'Tether',
-    logoURI: 'https://assets.coingecko.com/coins/images/325/small/Tether.png',
-  },
-  {
-    address: '0x0913da6da4b42f538b445599b46bb4622342cf52',
-    symbol: 'WBTC',
-    decimals: 8,
-    name: 'Wrapped BTC',
-    logoURI: 'https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png',
-  },
-];
-
 interface TokenSelectorProps {
+  tokens: Token[];
   selectedToken: Token | null;
   onSelect: (token: Token) => void;
-  label: string;
   excludeToken?: Token | null;
 }
 
-export function TokenSelector({ selectedToken, onSelect, label, excludeToken }: TokenSelectorProps) {
+export function TokenSelector({ tokens, selectedToken, onSelect, excludeToken }: TokenSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const filteredTokens = excludeToken
-    ? TOKENS.filter((t) => t.address !== excludeToken.address)
-    : TOKENS;
+    ? tokens.filter((t) => t.address !== excludeToken.address)
+    : tokens;
 
   return (
     <div className="relative">
-      <label className="block text-sm text-gray-400 mb-1">{label}</label>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-gray-800 rounded-xl border border-gray-700 hover:border-purple-500 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-gray-700 rounded-xl hover:bg-gray-600 transition-colors min-w-[120px]"
       >
         {selectedToken ? (
-          <div className="flex items-center gap-2">
+          <>
             {selectedToken.logoURI && (
               <img
                 src={selectedToken.logoURI}
@@ -81,12 +41,12 @@ export function TokenSelector({ selectedToken, onSelect, label, excludeToken }: 
               />
             )}
             <span className="font-medium">{selectedToken.symbol}</span>
-          </div>
+          </>
         ) : (
-          <span className="text-gray-400">Select token</span>
+          <span className="text-gray-400">Select</span>
         )}
         <svg
-          className={`w-5 h-5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 ml-auto transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -96,7 +56,7 @@ export function TokenSelector({ selectedToken, onSelect, label, excludeToken }: 
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden">
+        <div className="absolute right-0 z-50 w-48 mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden">
           {filteredTokens.map((token) => (
             <button
               key={token.address}
@@ -108,11 +68,11 @@ export function TokenSelector({ selectedToken, onSelect, label, excludeToken }: 
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors"
             >
               {token.logoURI && (
-                <img src={token.logoURI} alt={token.symbol} className="w-8 h-8 rounded-full" />
+                <img src={token.logoURI} alt={token.symbol} className="w-7 h-7 rounded-full" />
               )}
               <div className="text-left">
                 <div className="font-medium">{token.symbol}</div>
-                <div className="text-sm text-gray-400">{token.name}</div>
+                <div className="text-xs text-gray-400">{token.name}</div>
               </div>
             </button>
           ))}
@@ -121,5 +81,3 @@ export function TokenSelector({ selectedToken, onSelect, label, excludeToken }: 
     </div>
   );
 }
-
-export { TOKENS };
