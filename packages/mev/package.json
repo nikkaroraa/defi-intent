@@ -1,0 +1,23 @@
+{
+  "name": "@katana-intent/mev",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/cli.ts",
+    "build": "tsc",
+    "start": "tsx src/cli.ts",
+    "scan": "tsx src/cli.ts scan",
+    "monitor": "tsx src/cli.ts monitor",
+    "simulate": "tsx src/cli.ts simulate"
+  },
+  "dependencies": {
+    "viem": "^2.10.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
