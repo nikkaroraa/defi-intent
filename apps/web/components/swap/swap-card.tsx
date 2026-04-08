@@ -190,7 +190,7 @@ export function SwapCard() {
   const needsChainSwitch = walletChainId !== selectedChain.id;
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full">
       <div className="bg-card rounded-2xl p-6 border border-border shadow-xl">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Swap</h2>
