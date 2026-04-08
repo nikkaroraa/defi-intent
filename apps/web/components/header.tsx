@@ -23,23 +23,23 @@ type NavGroup = { label: string; icon: any; href?: undefined; children: NavLink[
 type NavItem = NavLink | NavGroup;
 
 const NAV_ITEMS: NavItem[] = [
-  { href: '/', label: 'Chat', icon: MessageSquare },
-  { href: '/swap', label: 'Swap', icon: ArrowLeftRight },
-  { href: '/rebalance', label: 'Yields', icon: TrendingUp },
+  { href: '/app', label: 'Chat', icon: MessageSquare },
+  { href: '/app/swap', label: 'Swap', icon: ArrowLeftRight },
+  { href: '/app/rebalance', label: 'Yields', icon: TrendingUp },
   {
     label: 'Advanced',
     icon: ChevronDown,
     children: [
-      { href: '/spectra', label: 'Spectra', icon: TrendingUp },
-      { href: '/hyperliquid', label: 'Hyperliquid', icon: Waves },
-      { href: '/liquidator', label: 'Liquidator', icon: Skull },
+      { href: '/app/spectra', label: 'Spectra', icon: TrendingUp },
+      { href: '/app/hyperliquid', label: 'Hyperliquid', icon: Waves },
+      { href: '/app/liquidator', label: 'Liquidator', icon: Skull },
     ],
   },
 ];
 
 const SECONDARY_ITEMS = [
-  { href: '/history', label: 'History', icon: History },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/app/history', label: 'History', icon: History },
+  { href: '/app/settings', label: 'Settings', icon: Settings },
 ];
 
 export function Header() {
@@ -48,17 +48,17 @@ export function Header() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const isActive = (href: string) => pathname === href;
-  const isAdvancedActive = ['/spectra', '/hyperliquid', '/liquidator'].includes(pathname);
+  const isAdvancedActive = ['/app/spectra', '/app/hyperliquid', '/app/liquidator'].includes(pathname);
 
   return (
     <header className="border-b border-border/60 backdrop-blur-xl bg-gray-950/80 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
         <Link
-          href="/"
+          href="/app"
           className="flex items-center gap-2.5 hover:opacity-90 transition-opacity shrink-0"
         >
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
             <Sword className="w-4 h-4 text-white" />
           </div>
           <span className="font-semibold text-base text-gray-100">

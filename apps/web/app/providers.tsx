@@ -49,7 +49,7 @@ const Header = dynamic(() => import('@/components/header').then(mod => mod.Heade
     <header className="border-b border-border/60 bg-gray-950/80 h-14">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600" />
+          <div className="w-7 h-7 rounded-lg bg-indigo-600" />
           <span className="font-semibold text-base text-gray-100">Katana<span className="text-indigo-400"> Intent</span></span>
         </div>
       </div>
