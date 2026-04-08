@@ -138,20 +138,18 @@ export default function LiquidatorPage() {
       </StatGrid>
 
       {/* Controls */}
-      <div className="flex items-center justify-between mb-4">
-        <Tabs defaultValue="opportunities">
-          <div className="flex items-center justify-between w-full">
-            <TabsList>
-              <TabsTrigger value="opportunities">
-                Opportunities ({opportunities.length})
-              </TabsTrigger>
-              <TabsTrigger value="history">
-                History ({history.length})
-              </TabsTrigger>
-            </TabsList>
-          </div>
+      <Tabs defaultValue="opportunities">
+        <div className="flex items-center justify-between mb-4">
+          <TabsList>
+            <TabsTrigger value="opportunities">
+              Opportunities ({opportunities.length})
+            </TabsTrigger>
+            <TabsTrigger value="history">
+              History ({history.length})
+            </TabsTrigger>
+          </TabsList>
 
-          <div className="flex items-center gap-3 mt-4 mb-2 justify-end">
+          <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
               <input
                 type="checkbox"
@@ -166,8 +164,9 @@ export default function LiquidatorPage() {
               Refresh
             </Button>
           </div>
+        </div>
 
-          {/* Opportunities Tab */}
+        {/* Opportunities Tab */}
           <TabsContent value="opportunities">
             <DataTable>
               <DataTableHeader>
@@ -278,8 +277,7 @@ export default function LiquidatorPage() {
               </tbody>
             </DataTable>
           </TabsContent>
-        </Tabs>
-      </div>
+      </Tabs>
 
       {/* Bot Status */}
       <Card className="mt-8">
