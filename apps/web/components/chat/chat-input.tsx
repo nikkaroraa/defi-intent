@@ -35,7 +35,7 @@ export function ChatInput({ onSend, disabled, isLoading }: ChatInputProps) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={disabled ? "Connect wallet to chat..." : "Ask anything about DeFi on Katana..."}
+              placeholder={disabled ? "Connect wallet to chat..." : "Ask about yields, swaps, positions..."}
               disabled={disabled || isLoading}
               rows={1}
               className={cn(
@@ -77,9 +77,9 @@ export function ChatInput({ onSend, disabled, isLoading }: ChatInputProps) {
               onClick={() => !disabled && !isLoading && onSend(suggestion)}
               disabled={disabled || isLoading}
               className={cn(
-                "text-xs px-3 py-1.5 rounded-full",
-                "border border-border bg-card/50",
-                "text-muted-foreground hover:text-foreground hover:bg-card",
+                "text-xs px-3 py-1.5 rounded-lg",
+                "border border-border bg-card",
+                "text-muted-foreground hover:text-foreground hover:bg-accent hover:border-indigo-500/30",
                 "transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               )}
             >
