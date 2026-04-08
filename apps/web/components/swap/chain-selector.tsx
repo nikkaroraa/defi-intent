@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export interface Chain {
   id: number;
@@ -33,13 +33,22 @@ interface ChainSelectorProps {
 
 export function ChainSelector({ selectedChain, onSelect }: ChainSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setIsOpen(false);
+    }
+    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-lg border border-border hover:border-indigo-500 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 bg-secondary rounded-lg border border-border hover:border-indigo-500/50 transition-colors"
       >
         <img
           src={selectedChain.logoURI}
@@ -58,7 +67,7 @@ export function ChainSelector({ selectedChain, onSelect }: ChainSelectorProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute z-50 w-full mt-2 bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+        <div className="absolute right-0 z-[100] w-44 mt-2 bg-card border border-border rounded-lg shadow-2xl shadow-black/50">
           {CHAINS.map((chain) => (
             <button
               key={chain.id}
@@ -67,7 +76,7 @@ export function ChainSelector({ selectedChain, onSelect }: ChainSelectorProps) {
                 onSelect(chain);
                 setIsOpen(false);
               }}
-              className={`w-full flex items-center gap-3 px-3 py-2 hover:bg-accent transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 hover:bg-accent transition-colors first:rounded-t-lg last:rounded-b-lg ${
                 chain.id === selectedChain.id ? 'bg-accent' : ''
               }`}
             >

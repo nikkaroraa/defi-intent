@@ -191,7 +191,7 @@ export function SwapCard() {
 
   return (
     <div className="w-full">
-      <div className="bg-card rounded-2xl p-6 border border-border shadow-xl">
+      <div className="bg-card rounded-2xl p-6 border border-border shadow-xl overflow-visible">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Swap</h2>
           <ChainSelector selectedChain={selectedChain} onSelect={handleChainChange} />
@@ -299,7 +299,7 @@ export function SwapCard() {
         {/* Success */}
         {isSuccess && (
           <div className="mt-4 p-3 bg-green-900/30 border border-green-800 rounded-xl text-green-400 text-sm">
-            Swap successful! 🎉
+            Swap successful!
           </div>
         )}
 
