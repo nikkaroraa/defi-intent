@@ -307,7 +307,7 @@ export function SwapCard() {
         <button
           onClick={handleSwap}
           disabled={!isConnected || (!quote && !needsChainSwitch) || isSending || isConfirming}
-          className="w-full mt-4 py-4 bg-gradient-to-r from-indigo-600 to-pink-600 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:from-indigo-500 hover:to-pink-500 transition-all"
+          className="w-full mt-4 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {!isConnected
             ? 'Connect Wallet'

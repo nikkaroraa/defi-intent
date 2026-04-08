@@ -23,7 +23,7 @@ export function ChatMessageBubble({ message }: ChatMessageProps) {
       )}
     >
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
           <Bot className="w-5 h-5 text-white" />
         </div>
       )}
@@ -70,7 +70,7 @@ export function TypingIndicator() {
       animate={{ opacity: 1 }}
       className="flex gap-3 p-4"
     >
-      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center">
+      <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
         <Bot className="w-5 h-5 text-white" />
       </div>
       <div className="bg-card border border-border rounded-2xl px-4 py-3 flex items-center gap-2">
