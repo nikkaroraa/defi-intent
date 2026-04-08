@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, Sparkles } from 'lucide-react';
+import { Wallet, Sword } from 'lucide-react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useChatStore, generateMessageId } from '@/lib/store';
 import { ChatMessageBubble, TypingIndicator } from './chat-message';
@@ -93,43 +93,48 @@ export function ChatContainer() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-center py-12"
+              className="py-16 max-w-lg mx-auto"
             >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-white" />
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center">
+                  <Sword className="w-5 h-5 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">
+                  Katana Intent
+                </h2>
               </div>
-              <h2 className="text-2xl font-bold mb-2 gradient-text">
-                Welcome to Katana Intent
-              </h2>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Your AI-powered DeFi assistant. Ask me about yields, swaps, positions, 
-                or anything else on Katana.
+              <p className="text-muted-foreground mb-8 text-[15px] leading-relaxed">
+                DeFi copilot. Ask about yields, execute swaps, check positions, or explore protocols across Ethereum, Base, and Arbitrum.
               </p>
 
               {!isConnected ? (
-                <div className="inline-flex flex-col items-center gap-3 p-6 rounded-xl bg-card border border-border">
-                  <Wallet className="w-8 h-8 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Connect your wallet to get started
-                  </p>
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border">
+                  <Wallet className="w-5 h-5 text-muted-foreground shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm text-foreground font-medium">Connect wallet to start</p>
+                    <p className="text-xs text-muted-foreground">Supports MetaMask, Rabby, Coinbase, WalletConnect</p>
+                  </div>
                   <ConnectButton />
                 </div>
               ) : (
-                <div className="flex flex-wrap justify-center gap-2">
-                  {[
-                    'Show my balances',
-                    'What\'s the best yield for USDC?',
-                    'Check my positions',
-                    'Swap 0.1 ETH to USDC',
-                  ].map((example) => (
-                    <button
-                      key={example}
-                      onClick={() => handleSendMessage(example)}
-                      className="px-4 py-2 rounded-xl bg-card border border-border text-sm hover:bg-accent transition-colors"
-                    >
-                      {example}
-                    </button>
-                  ))}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-3">Try asking</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      'Show my balances',
+                      'Best yield for USDC?',
+                      'Check my positions',
+                      'Swap 0.1 ETH to USDC',
+                    ].map((example) => (
+                      <button
+                        key={example}
+                        onClick={() => handleSendMessage(example)}
+                        className="px-3 py-2.5 rounded-lg bg-card border border-border text-sm text-left hover:bg-accent hover:border-indigo-500/30 transition-all"
+                      >
+                        {example}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </motion.div>
