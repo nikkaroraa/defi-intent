@@ -10,6 +10,8 @@
  * - PT trades at discount to underlying (discount = fixed yield)
  * - YT value = total future yield until maturity
  * - At maturity: PT = underlying, YT = 0
+ *
+ * Data is fetched from DeFi Llama (project: "spectra") for live APYs and TVLs.
  */
 
 import {
@@ -29,14 +31,14 @@ export interface SpectraMarket {
   name: string;
   ptAddress: Address;
   ytAddress: Address;
-  ibtAddress: Address; // Interest-bearing token (e.g., yvUSDC)
-  underlyingAddress: Address; // Underlying token (e.g., USDC)
+  ibtAddress: Address;
+  underlyingAddress: Address;
   underlyingSymbol: string;
-  maturity: number; // Unix timestamp
-  ptPrice: number; // PT price in underlying terms (0-1)
-  ytPrice: number; // YT price in underlying terms
-  fixedAPY: number; // Implied fixed rate from PT discount
-  variableAPY: number; // Current variable rate of IBT
+  maturity: number;
+  ptPrice: number;
+  ytPrice: number;
+  fixedAPY: number;
+  variableAPY: number;
   tvl: bigint;
 }
 
@@ -50,69 +52,17 @@ export interface PTYTPosition {
 }
 
 // ===========================================
-// SPECTRA CONTRACTS
+// SPECTRA CONTRACTS (Ethereum Mainnet)
 // ===========================================
 
-// Katana Spectra deployment (placeholder addresses - need real ones)
-export const SPECTRA_REGISTRY = '0x0000000000000000000000000000000000000000' as Address;
-export const SPECTRA_ROUTER = '0x0000000000000000000000000000000000000000' as Address;
-export const SPECTRA_FACTORY = '0x0000000000000000000000000000000000000000' as Address;
-
-// Known Spectra markets on Katana
-export const SPECTRA_MARKETS: SpectraMarket[] = [
-  {
-    id: 'spectra-yvusdc-mar25',
-    name: 'PT-yvUSDC (Mar 2025)',
-    ptAddress: '0x0000000000000000000000000000000000000001' as Address,
-    ytAddress: '0x0000000000000000000000000000000000000002' as Address,
-    ibtAddress: '0x0000000000000000000000000000000000000003' as Address,
-    underlyingAddress: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36' as Address, // USDC
-    underlyingSymbol: 'USDC',
-    maturity: 1743465600, // March 31, 2025
-    ptPrice: 0.95, // PT trades at 5% discount
-    ytPrice: 0.05,
-    fixedAPY: 0.11, // 11% fixed APY
-    variableAPY: 0.085, // 8.5% variable
-    tvl: BigInt(3200000) * BigInt(10) ** BigInt(6),
-  },
-  {
-    id: 'spectra-yvweth-jun25',
-    name: 'PT-yvWETH (Jun 2025)',
-    ptAddress: '0x0000000000000000000000000000000000000004' as Address,
-    ytAddress: '0x0000000000000000000000000000000000000005' as Address,
-    ibtAddress: '0x0000000000000000000000000000000000000006' as Address,
-    underlyingAddress: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62' as Address, // WETH
-    underlyingSymbol: 'WETH',
-    maturity: 1751328000, // June 30, 2025
-    ptPrice: 0.97,
-    ytPrice: 0.03,
-    fixedAPY: 0.065, // 6.5% fixed APY
-    variableAPY: 0.052, // 5.2% variable
-    tvl: BigInt(1800) * BigInt(10) ** BigInt(18),
-  },
-  {
-    id: 'spectra-yvdai-sep25',
-    name: 'PT-yvDAI (Sep 2025)',
-    ptAddress: '0x0000000000000000000000000000000000000007' as Address,
-    ytAddress: '0x0000000000000000000000000000000000000008' as Address,
-    ibtAddress: '0x0000000000000000000000000000000000000009' as Address,
-    underlyingAddress: '0x4b6b9b31c72836806b0b1104cf1cdab8a0e3bd66' as Address, // DAI
-    underlyingSymbol: 'DAI',
-    maturity: 1759248000, // September 30, 2025
-    ptPrice: 0.92,
-    ytPrice: 0.08,
-    fixedAPY: 0.095, // 9.5% fixed APY
-    variableAPY: 0.078, // 7.8% variable
-    tvl: BigInt(2100000) * BigInt(10) ** BigInt(18),
-  },
-];
+export const SPECTRA_REGISTRY = '0x085EE67132Ec4297b85ed5d8b4c8150B139C4532' as Address;
+export const SPECTRA_ROUTER = '0x3d20601ac0Ba4e5891A2174A7AEFe14AAA0C39c1' as Address;
 
 // ===========================================
 // ABIs
 // ===========================================
 
 export const PRINCIPAL_TOKEN_ABI = [
-  // EIP-5095 functions
   {
     name: 'maturity',
     type: 'function',
@@ -218,6 +168,40 @@ export const YIELD_TOKEN_ABI = [
 ] as const;
 
 // ===========================================
+// DATA FETCHING (via DeFi Llama)
+// ===========================================
+
+interface DefiLlamaPool {
+  pool: string;
+  chain: string;
+  project: string;
+  symbol: string;
+  tvlUsd: number;
+  apy: number | null;
+  apyBase: number | null;
+  poolMeta: string | null;
+}
+
+/**
+ * Fetch Spectra yields from DeFi Llama
+ */
+async function fetchSpectraFromDeFiLlama(): Promise<DefiLlamaPool[]> {
+  try {
+    const res = await fetch('https://yields.llama.fi/pools');
+    if (!res.ok) return [];
+
+    const data = await res.json();
+    const pools: DefiLlamaPool[] = data.data;
+
+    return pools.filter(
+      (p) => p.project === 'spectra' || p.project === 'pendle'
+    );
+  } catch {
+    return [];
+  }
+}
+
+// ===========================================
 // YIELD CALCULATION
 // ===========================================
 
@@ -227,7 +211,7 @@ export const YIELD_TOKEN_ABI = [
  */
 export function calculateFixedAPY(ptPrice: number, maturityTimestamp: number): number {
   const now = Date.now() / 1000;
-  const timeToMaturity = (maturityTimestamp - now) / (365 * 24 * 3600); // In years
+  const timeToMaturity = (maturityTimestamp - now) / (365 * 24 * 3600);
 
   if (timeToMaturity <= 0) return 0;
 
@@ -239,7 +223,6 @@ export function calculateFixedAPY(ptPrice: number, maturityTimestamp: number): n
 
 /**
  * Calculate YT value based on expected yield
- * YT value = expected yield until maturity
  */
 export function calculateYTValue(
   variableAPY: number,
@@ -266,7 +249,7 @@ export function compareStrategies(market: SpectraMarket): {
   const now = Date.now() / 1000;
   const timeToMaturity = (market.maturity - now) / (365 * 24 * 3600);
 
-  const fixedYield = (1 - market.ptPrice) * 100; // Total fixed return
+  const fixedYield = (1 - market.ptPrice) * 100;
   const expectedVariableYield = market.variableAPY * timeToMaturity * 100;
 
   let recommendation: 'fixed' | 'variable' | 'neutral';
@@ -291,44 +274,30 @@ export function compareStrategies(market: SpectraMarket): {
 // ===========================================
 
 /**
- * Fetch all Spectra yield opportunities
+ * Fetch all Spectra/Pendle yield opportunities from DeFi Llama
  */
 export async function fetchSpectraYields(): Promise<YieldOpportunity[]> {
+  const pools = await fetchSpectraFromDeFiLlama();
   const opportunities: YieldOpportunity[] = [];
 
-  for (const market of SPECTRA_MARKETS) {
-    // Check if market is still active
-    const now = Date.now() / 1000;
-    if (market.maturity < now) continue;
+  for (const pool of pools) {
+    if (!pool.apy || pool.apy <= 0 || !pool.tvlUsd || pool.tvlUsd < 50_000) continue;
 
-    const daysToMaturity = Math.floor((market.maturity - now) / (24 * 3600));
+    const apy = pool.apy / 100; // Convert percentage to decimal
+    const symbol = pool.symbol.split('-')[0] || pool.symbol;
+    const isFixed = pool.poolMeta?.toLowerCase().includes('pt') || pool.symbol.toLowerCase().includes('pt-');
 
-    // PT opportunity (fixed yield)
     opportunities.push({
-      id: `${market.id}-pt`,
+      id: pool.pool,
       protocol: 'spectra' as Protocol,
-      name: market.name,
-      asset: market.underlyingSymbol,
-      assetAddress: market.underlyingAddress,
-      apy: market.fixedAPY,
-      tvl: market.tvl,
-      contractAddress: market.ptAddress,
-      risk: 'low', // Fixed yield = low risk
-      description: `Fixed ${(market.fixedAPY * 100).toFixed(1)}% APY, matures in ${daysToMaturity} days`,
-    });
-
-    // YT opportunity (leveraged variable yield)
-    opportunities.push({
-      id: `${market.id}-yt`,
-      protocol: 'spectra' as Protocol,
-      name: `YT-${market.name.replace('PT-', '')}`,
-      asset: market.underlyingSymbol,
-      assetAddress: market.underlyingAddress,
-      apy: market.variableAPY * (1 / market.ytPrice), // YT provides leveraged exposure
-      tvl: market.tvl / BigInt(10), // YT is smaller market
-      contractAddress: market.ytAddress,
-      risk: 'high', // YT is speculative
-      description: `Leveraged yield exposure, ${daysToMaturity} days to expiry`,
+      name: `${pool.project === 'pendle' ? 'Pendle' : 'Spectra'} ${pool.symbol}`,
+      asset: symbol,
+      assetAddress: '0x0000000000000000000000000000000000000000' as Address, // Not available from DeFi Llama
+      apy,
+      tvl: BigInt(Math.round(pool.tvlUsd)),
+      contractAddress: SPECTRA_REGISTRY,
+      risk: isFixed ? 'low' : 'high',
+      description: `${isFixed ? 'Fixed' : 'Variable'} yield on ${pool.chain}${pool.poolMeta ? ` (${pool.poolMeta})` : ''}`,
     });
   }
 
@@ -338,35 +307,16 @@ export async function fetchSpectraYields(): Promise<YieldOpportunity[]> {
 /**
  * Get best fixed yield for an asset
  */
-export function getBestFixedYield(asset: string): SpectraMarket | null {
-  const markets = SPECTRA_MARKETS.filter(
-    (m) =>
-      m.underlyingSymbol.toUpperCase() === asset.toUpperCase() &&
-      m.maturity > Date.now() / 1000
+export async function getBestFixedYield(asset: string): Promise<YieldOpportunity | null> {
+  const yields = await fetchSpectraYields();
+  const fixed = yields.filter(
+    (y) =>
+      y.asset.toUpperCase() === asset.toUpperCase() &&
+      y.description?.includes('Fixed')
   );
 
-  if (markets.length === 0) return null;
-
-  // Sort by fixed APY descending
-  markets.sort((a, b) => b.fixedAPY - a.fixedAPY);
-
-  return markets[0];
-}
-
-/**
- * Build deposit transaction for Spectra PT
- */
-export function buildSpectraDepositTx(
-  market: SpectraMarket,
-  amount: bigint,
-  receiver: Address
-): { to: Address; data: `0x${string}` } {
-  // This would use encodeFunctionData in production
-  // Simplified for demo
-  return {
-    to: market.ptAddress,
-    data: '0x' as `0x${string}`,
-  };
+  if (fixed.length === 0) return null;
+  return fixed.reduce((best, current) => (current.apy > best.apy ? current : best));
 }
 
 // ===========================================
@@ -379,7 +329,7 @@ export function formatSpectraMarket(market: SpectraMarket): string {
   const comparison = compareStrategies(market);
 
   return [
-    `📊 ${market.name}`,
+    `${market.name}`,
     `  Underlying: ${market.underlyingSymbol}`,
     `  Maturity: ${daysToMaturity} days`,
     `  Fixed APY: ${(market.fixedAPY * 100).toFixed(2)}% (via PT)`,
@@ -395,15 +345,10 @@ export function formatYieldComparison(market: SpectraMarket): string {
   const comparison = compareStrategies(market);
 
   return `
-┌─────────────────────────────────────────────────┐
-│ ${market.name.padEnd(47)} │
-├─────────────────────────────────────────────────┤
-│ Strategy     │ Expected Return │ Risk          │
-├──────────────┼─────────────────┼───────────────┤
-│ Fixed (PT)   │ ${comparison.fixedYield.toFixed(2).padStart(13)}% │ Low           │
-│ Variable     │ ${comparison.expectedVariableYield.toFixed(2).padStart(13)}% │ Medium        │
-│ YT Leverage  │ ${(market.variableAPY * 100 / market.ytPrice).toFixed(2).padStart(13)}% │ High          │
-├─────────────────────────────────────────────────┤
-│ 💡 Recommendation: ${comparison.recommendation.toUpperCase().padEnd(27)} │
-└─────────────────────────────────────────────────┘`;
+${market.name}
+Strategy     | Expected Return | Risk
+Fixed (PT)   | ${comparison.fixedYield.toFixed(2).padStart(13)}% | Low
+Variable     | ${comparison.expectedVariableYield.toFixed(2).padStart(13)}% | Medium
+YT Leverage  | ${(market.variableAPY * 100 / market.ytPrice).toFixed(2).padStart(13)}% | High
+Recommendation: ${comparison.recommendation.toUpperCase()}`;
 }

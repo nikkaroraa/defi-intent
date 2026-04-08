@@ -76,19 +76,23 @@ const CHAINS: Record<number, ChainConfig> = {
       { name: 'SushiSwap', type: 'v2', router: '0x6BDED42c6DA8FBf0d2bA55B2fa120C5e0c8D7891' },
     ],
   },
-  747474: {
-    id: 747474,
-    name: 'Katana',
-    rpc: process.env.KATANA_RPC_URL || 'https://rpc.katana.network',
-    weth: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62',
+  42161: {
+    id: 42161,
+    name: 'Arbitrum',
+    rpc: process.env.ARB_RPC_URL || 'https://arb1.arbitrum.io/rpc',
+    weth: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1' as Address,
     tokens: {
       ETH: { address: zeroAddress, decimals: 18 },
-      WETH: { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', decimals: 18 },
-      USDC: { address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36', decimals: 6 },
-      USDT: { address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2', decimals: 6 },
-      WBTC: { address: '0x0913da6da4b42f538b445599b46bb4622342cf52', decimals: 8 },
+      WETH: { address: '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1' as Address, decimals: 18 },
+      USDC: { address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831' as Address, decimals: 6 },
+      USDT: { address: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9' as Address, decimals: 6 },
+      ARB: { address: '0x912CE59144191C1204E64559FE8253a0e49E6548' as Address, decimals: 18 },
+      WBTC: { address: '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f' as Address, decimals: 8 },
     },
-    dexes: [{ name: 'Sushi V2', type: 'v2', router: '0x69cc349932ae18ed406eeb917d79b9b3033fb68e' }],
+    dexes: [
+      { name: 'Uniswap V3', type: 'v3' as const, router: '0xE592427A0AEce92De3Edee1F18E0157C05861564' as Address, quoter: '0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6' as Address },
+      { name: 'SushiSwap', type: 'v2' as const, router: '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506' as Address },
+    ],
   },
 };
 
@@ -446,7 +450,7 @@ async function getAerodromeQuote(
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const chainId = parseInt(searchParams.get('chainId') || '747474');
+  const chainId = parseInt(searchParams.get('chainId') || '8453');
   const tokenInSymbol = searchParams.get('tokenIn')?.toUpperCase();
   const tokenOutSymbol = searchParams.get('tokenOut')?.toUpperCase();
   const amount = searchParams.get('amount');
@@ -691,6 +695,8 @@ export async function GET(request: NextRequest) {
         amountOut: formatUnits(q.amountOut, tokenOut.decimals),
       })),
       txs,
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=5' },
     });
   } catch (e: any) {
     console.error('Quote error:', e);

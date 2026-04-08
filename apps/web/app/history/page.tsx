@@ -18,7 +18,7 @@ export default function HistoryPage() {
     <div className="container mx-auto max-w-3xl py-8 px-4">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center">
             <History className="w-5 h-5 text-white" />
           </div>
           <div>

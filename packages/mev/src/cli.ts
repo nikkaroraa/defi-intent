@@ -23,7 +23,7 @@ import {
   formatResult,
   DEFAULT_CONFIG,
 } from './executor.js';
-import { TOKENS, KATANA_CHAIN, SUSHI_V2_FACTORY } from './config.js';
+import { TOKENS, CHAIN, SUSHI_V2_FACTORY } from './config.js';
 import { formatUnits } from 'viem';
 
 // ===========================================
@@ -41,8 +41,8 @@ async function cmdHelp() {
   console.log('  research   - Show research summary');
   console.log('  help       - Show this help');
   console.log('\nConfiguration:');
-  console.log(`  Chain: ${KATANA_CHAIN.name} (${KATANA_CHAIN.id})`);
-  console.log(`  RPC: ${KATANA_CHAIN.rpc}`);
+  console.log(`  Chain: ${CHAIN.name} (${CHAIN.id})`);
+  console.log(`  RPC: ${CHAIN.rpc}`);
   console.log(`  Tokens: ${Object.keys(TOKENS).join(', ')}`);
 }
 

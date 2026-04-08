@@ -99,7 +99,7 @@ export interface HLPPosition {
 // ===========================================
 
 // HLP is the main protocol vault
-export const HLP_VAULT_ADDRESS = '0xdead000000000000000000000000000000000000'; // Placeholder
+export const HLP_VAULT_ADDRESS = '0xfefefefefefefefefefefefefefefefefefefefe'; // HLP vault on Hyperliquid
 
 // Popular vaults (examples)
 export const KNOWN_VAULTS = [

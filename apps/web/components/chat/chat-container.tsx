@@ -95,7 +95,7 @@ export function ChatContainer() {
               animate={{ opacity: 1, y: 0 }}
               className="text-center py-12"
             >
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center">
                 <Sparkles className="w-8 h-8 text-white" />
               </div>
               <h2 className="text-2xl font-bold mb-2 gradient-text">

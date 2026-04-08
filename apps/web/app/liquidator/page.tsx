@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Skull,
   TrendingDown,
@@ -12,6 +12,14 @@ import {
   Clock,
   Zap,
 } from 'lucide-react';
+import { Stat, StatGrid } from '@/components/ui/stat';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { SkeletonTable } from '@/components/ui/skeleton';
+import { PageLayout, PageHeader } from '@/components/ui/page-layout';
+import { DataTable, DataTableHeader, DataTableRow } from '@/components/ui/data-table';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { useApiQuery } from '@/hooks/use-api-query';
 
 interface Opportunity {
   id: string;
@@ -39,65 +47,35 @@ interface Liquidation {
   timestamp: number;
 }
 
+interface OppData {
+  opportunities: Opportunity[];
+  stats: { totalOpportunities: number; totalPotentialProfit: string; avgHealthFactor: string };
+}
+
+interface HistData {
+  liquidations: Liquidation[];
+  stats: { totalLiquidations: number; totalProfit: string };
+}
+
 export default function LiquidatorPage() {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
-  const [history, setHistory] = useState<Liquidation[]>([]);
-  const [stats, setStats] = useState({
-    totalOpportunities: 0,
-    totalPotentialProfit: '0',
-    avgHealthFactor: '0',
-  });
-  const [historyStats, setHistoryStats] = useState({
-    totalLiquidations: 0,
-    totalProfit: '0',
-  });
-  const [loading, setLoading] = useState(true);
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [tab, setTab] = useState<'opportunities' | 'history'>('opportunities');
-  const [isConnected, setIsConnected] = useState(false);
 
-  // Check wallet connection on mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const { useAccount } = await import('wagmi');
-        // This is a simplified check - in production use proper wagmi hooks
-        setIsConnected(false);
-      } catch {}
-    };
-    checkConnection();
-  }, []);
+  const { data: oppData, isLoading: oppLoading, refetch } = useApiQuery<OppData>(
+    ['liquidations-opportunities'],
+    '/api/liquidations?type=opportunities',
+    { refetchInterval: autoRefresh ? 10000 : false }
+  );
 
-  async function fetchData() {
-    setLoading(true);
-    try {
-      // Fetch opportunities
-      const oppRes = await fetch('/api/liquidations?type=opportunities');
-      const oppData = await oppRes.json();
-      setOpportunities(oppData.opportunities || []);
-      setStats(oppData.stats || {});
+  const { data: histData, isLoading: histLoading } = useApiQuery<HistData>(
+    ['liquidations-history'],
+    '/api/liquidations?type=history'
+  );
 
-      // Fetch history
-      const histRes = await fetch('/api/liquidations?type=history');
-      const histData = await histRes.json();
-      setHistory(histData.liquidations || []);
-      setHistoryStats(histData.stats || {});
-    } catch (e) {
-      console.error('Failed to fetch liquidation data:', e);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    if (!autoRefresh) return;
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, [autoRefresh]);
+  const opportunities = oppData?.opportunities || [];
+  const stats = oppData?.stats || { totalOpportunities: 0, totalPotentialProfit: '0', avgHealthFactor: '0' };
+  const history = histData?.liquidations || [];
+  const historyStats = histData?.stats || { totalLiquidations: 0, totalProfit: '0' };
+  const loading = oppLoading || histLoading;
 
   const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   const formatTime = (ts: number) => {
@@ -128,105 +106,71 @@ export default function LiquidatorPage() {
   };
 
   return (
-    <div className="flex-1 p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
-          <Skull className="w-8 h-8 text-red-500" />
-          Liquidation Bot
-        </h1>
-        <p className="text-gray-400">
-          Monitor and execute Morpho Blue liquidations on Katana
-        </p>
-      </div>
+    <PageLayout>
+      <PageHeader
+        icon={<Skull className="w-6 h-6 text-red-500" />}
+        title="Liquidation Bot"
+        description="Monitor and execute Morpho Blue liquidations"
+      />
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <AlertTriangle className="w-4 h-4" />
-            Opportunities
-          </div>
-          <div className="text-2xl font-bold text-red-400">{stats.totalOpportunities}</div>
-        </div>
-
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <DollarSign className="w-4 h-4" />
-            Potential Profit
-          </div>
-          <div className="text-2xl font-bold text-green-400">${stats.totalPotentialProfit}</div>
-        </div>
-
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <Activity className="w-4 h-4" />
-            Avg Health Factor
-          </div>
-          <div className="text-2xl font-bold text-yellow-400">{stats.avgHealthFactor}</div>
-        </div>
-
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-1">
-            <CheckCircle className="w-4 h-4" />
-            Total Liquidated
-          </div>
-          <div className="text-2xl font-bold text-purple-400">${historyStats.totalProfit}</div>
-        </div>
-      </div>
+      <StatGrid cols={4} className="mb-6">
+        <Stat
+          label="Opportunities"
+          value={<span className="text-red-400">{stats.totalOpportunities}</span>}
+          icon={<AlertTriangle className="w-4 h-4" />}
+        />
+        <Stat
+          label="Potential Profit"
+          value={<span className="text-green-400">${stats.totalPotentialProfit}</span>}
+          icon={<DollarSign className="w-4 h-4" />}
+        />
+        <Stat
+          label="Avg Health Factor"
+          value={<span className="text-yellow-400">{stats.avgHealthFactor}</span>}
+          icon={<Activity className="w-4 h-4" />}
+        />
+        <Stat
+          label="Total Liquidated"
+          value={<span className="text-indigo-400">${historyStats.totalProfit}</span>}
+          icon={<CheckCircle className="w-4 h-4" />}
+        />
+      </StatGrid>
 
       {/* Controls */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex gap-2">
-          <button
-            onClick={() => setTab('opportunities')}
-            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              tab === 'opportunities'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            }`}
-          >
-            🎯 Opportunities ({opportunities.length})
-          </button>
-          <button
-            onClick={() => setTab('history')}
-            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              tab === 'history'
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-            }`}
-          >
-            📜 History ({history.length})
-          </button>
-        </div>
+        <Tabs defaultValue="opportunities">
+          <div className="flex items-center justify-between w-full">
+            <TabsList>
+              <TabsTrigger value="opportunities">
+                Opportunities ({opportunities.length})
+              </TabsTrigger>
+              <TabsTrigger value="history">
+                History ({history.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-sm text-gray-400">
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={(e) => setAutoRefresh(e.target.checked)}
-              className="rounded border-gray-700"
-            />
-            Auto-refresh
-          </label>
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 text-sm transition-colors"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-        </div>
-      </div>
+          <div className="flex items-center gap-3 mt-4 mb-2 justify-end">
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+                className="rounded border-border"
+              />
+              Auto-refresh
+            </label>
+            <Button variant="secondary" size="sm" onClick={() => refetch()} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          </div>
 
-      {/* Opportunities Tab */}
-      {tab === 'opportunities' && (
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-800 text-left text-sm text-gray-400">
+          {/* Opportunities Tab */}
+          <TabsContent value="opportunities">
+            <DataTable>
+              <DataTableHeader>
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Market</th>
                 <th className="px-4 py-3 text-center">Health</th>
@@ -236,77 +180,65 @@ export default function LiquidatorPage() {
                 <th className="px-4 py-3 text-right text-green-400">Est. Profit</th>
                 <th className="px-4 py-3 text-center">Age</th>
                 <th className="px-4 py-3 text-center">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
-                    Scanning for liquidatable positions...
-                  </td>
-                </tr>
-              ) : opportunities.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
-                    ✅ No liquidatable positions found
-                  </td>
-                </tr>
-              ) : (
-                opportunities.map((opp, i) => (
-                  <tr
-                    key={opp.id}
-                    className={`border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors ${
-                      opp.healthFactor < 0.9 ? 'bg-red-500/5' : ''
-                    }`}
-                  >
-                    <td className="px-4 py-3 font-mono text-sm">
-                      {formatAddress(opp.user)}
-                    </td>
-                    <td className="px-4 py-3 font-medium">{opp.market}</td>
-                    <td className="px-4 py-3 text-center">
-                      <HealthBadge hf={opp.healthFactor} />
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono">
-                      ${opp.borrowAmount}
-                      <div className="text-xs text-gray-500">{opp.loanToken}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono">
-                      {opp.collateralAmount}
-                      <div className="text-xs text-gray-500">{opp.collateralToken}</div>
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono text-gray-400">
-                      ${opp.maxRepayable}
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono text-green-400 font-semibold">
-                      ${opp.estimatedProfit}
-                    </td>
-                    <td className="px-4 py-3 text-center text-gray-500 text-sm">
-                      <Clock className="w-3 h-3 inline mr-1" />
-                      {formatTime(opp.timestamp)}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        disabled={!isConnected}
-                        className="flex items-center gap-1 text-xs px-3 py-1.5 bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg transition-colors mx-auto"
-                      >
-                        <Zap className="w-3 h-3" />
-                        Liquidate
-                      </button>
+              </DataTableHeader>
+              <tbody>
+                {oppLoading ? (
+                  <tr>
+                    <td colSpan={9} className="p-4">
+                      <SkeletonTable rows={4} cols={7} />
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                ) : opportunities.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
+                      No liquidatable positions found
+                    </td>
+                  </tr>
+                ) : (
+                  opportunities.map((opp) => (
+                    <DataTableRow key={opp.id} highlight={opp.healthFactor < 0.9}>
+                      <td className="px-4 py-3 font-mono text-sm">
+                        {formatAddress(opp.user)}
+                      </td>
+                      <td className="px-4 py-3 font-medium">{opp.market}</td>
+                      <td className="px-4 py-3 text-center">
+                        <HealthBadge hf={opp.healthFactor} />
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        ${opp.borrowAmount}
+                        <div className="text-xs text-muted-foreground">{opp.loanToken}</div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono">
+                        {opp.collateralAmount}
+                        <div className="text-xs text-muted-foreground">{opp.collateralToken}</div>
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-muted-foreground">
+                        ${opp.maxRepayable}
+                      </td>
+                      <td className="px-4 py-3 text-right font-mono text-green-400 font-semibold">
+                        ${opp.estimatedProfit}
+                      </td>
+                      <td className="px-4 py-3 text-center text-muted-foreground text-sm">
+                        <Clock className="w-3 h-3 inline mr-1" />
+                        {formatTime(opp.timestamp)}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <Button variant="danger" size="sm">
+                          <Zap className="w-3 h-3 mr-1" />
+                          Liquidate
+                        </Button>
+                      </td>
+                    </DataTableRow>
+                  ))
+                )}
+              </tbody>
+            </DataTable>
+          </TabsContent>
 
-      {/* History Tab */}
-      {tab === 'history' && (
-        <div className="bg-gray-900/50 border border-gray-800 rounded-xl overflow-hidden">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-800 text-left text-sm text-gray-400">
+          {/* History Tab */}
+          <TabsContent value="history">
+            <DataTable>
+              <DataTableHeader>
                 <th className="px-4 py-3">TX</th>
                 <th className="px-4 py-3">User</th>
                 <th className="px-4 py-3">Market</th>
@@ -314,69 +246,64 @@ export default function LiquidatorPage() {
                 <th className="px-4 py-3 text-right">Seized</th>
                 <th className="px-4 py-3 text-right text-green-400">Profit</th>
                 <th className="px-4 py-3 text-center">Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                    No liquidation history yet
-                  </td>
-                </tr>
-              ) : (
-                history.map((liq) => (
-                  <tr
-                    key={liq.id}
-                    className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors"
-                  >
-                    <td className="px-4 py-3 font-mono text-sm text-purple-400">
-                      {liq.txHash}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-sm">
-                      {formatAddress(liq.user)}
-                    </td>
-                    <td className="px-4 py-3 font-medium">{liq.market}</td>
-                    <td className="px-4 py-3 text-right font-mono">${liq.repaidAmount}</td>
-                    <td className="px-4 py-3 text-right font-mono">{liq.seizedAmount}</td>
-                    <td className="px-4 py-3 text-right font-mono text-green-400 font-semibold">
-                      ${liq.profit}
-                    </td>
-                    <td className="px-4 py-3 text-center text-gray-500 text-sm">
-                      {formatTime(liq.timestamp)}
+              </DataTableHeader>
+              <tbody>
+                {history.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                      No liquidation history yet
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+                ) : (
+                  history.map((liq) => (
+                    <DataTableRow key={liq.id}>
+                      <td className="px-4 py-3 font-mono text-sm text-indigo-400">
+                        {liq.txHash}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-sm">
+                        {formatAddress(liq.user)}
+                      </td>
+                      <td className="px-4 py-3 font-medium">{liq.market}</td>
+                      <td className="px-4 py-3 text-right font-mono">${liq.repaidAmount}</td>
+                      <td className="px-4 py-3 text-right font-mono">{liq.seizedAmount}</td>
+                      <td className="px-4 py-3 text-right font-mono text-green-400 font-semibold">
+                        ${liq.profit}
+                      </td>
+                      <td className="px-4 py-3 text-center text-muted-foreground text-sm">
+                        {formatTime(liq.timestamp)}
+                      </td>
+                    </DataTableRow>
+                  ))
+                )}
+              </tbody>
+            </DataTable>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Bot Status */}
-      <div className="mt-8 bg-gray-900/50 border border-gray-800 rounded-xl p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          🤖 Bot Configuration
-        </h3>
+      <Card className="mt-8">
+        <h3 className="text-lg font-semibold mb-4">Bot Configuration</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-sm text-gray-400 block mb-1">Min Profit Threshold</label>
+            <label className="text-sm text-muted-foreground block mb-1">Min Profit Threshold</label>
             <input
               type="text"
               defaultValue="$10"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm"
+              className="input-base w-full"
             />
           </div>
           <div>
-            <label className="text-sm text-gray-400 block mb-1">Max Gas Price (gwei)</label>
+            <label className="text-sm text-muted-foreground block mb-1">Max Gas Price (gwei)</label>
             <input
               type="text"
               defaultValue="50"
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm"
+              className="input-base w-full"
             />
           </div>
           <div>
-            <label className="text-sm text-gray-400 block mb-1">Execution Mode</label>
-            <select className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm">
+            <label className="text-sm text-muted-foreground block mb-1">Execution Mode</label>
+            <select className="select-base w-full">
               <option>Simulation (Dry Run)</option>
               <option>Direct Liquidation</option>
               <option>Flash Loan</option>
@@ -384,14 +311,9 @@ export default function LiquidatorPage() {
           </div>
         </div>
         <div className="mt-4 flex justify-end">
-          <button
-            disabled={!isConnected}
-            className="px-4 py-2 bg-red-600 hover:bg-red-500 disabled:bg-gray-700 disabled:text-gray-500 rounded-lg text-sm transition-colors"
-          >
-            {isConnected ? 'Start Bot' : 'Connect Wallet to Start'}
-          </button>
+          <Button variant="danger">Start Bot</Button>
         </div>
-      </div>
-    </div>
+      </Card>
+    </PageLayout>
   );
 }

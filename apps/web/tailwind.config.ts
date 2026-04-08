@@ -39,11 +39,6 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        katana: {
-          primary: '#6366f1',
-          secondary: '#8b5cf6',
-          accent: '#a855f7',
-        },
       },
       borderRadius: {
         lg: 'var(--radius)',

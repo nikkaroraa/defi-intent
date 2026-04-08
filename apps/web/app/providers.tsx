@@ -1,54 +1,56 @@
 'use client';
 
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import dynamic from 'next/dynamic';
-import { RainbowKitProvider, darkTheme, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, darkTheme, getDefaultConfig, connectorsForWallets } from '@rainbow-me/rainbowkit';
+import {
+  rabbyWallet,
+  metaMaskWallet,
+  coinbaseWallet,
+  walletConnectWallet,
+  injectedWallet,
+} from '@rainbow-me/rainbowkit/wallets';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, http } from 'wagmi';
-import { base, mainnet } from 'wagmi/chains';
+import { WagmiProvider, createConfig, http } from 'wagmi';
+import { base, mainnet, arbitrum } from 'wagmi/chains';
+import { injected } from 'wagmi/connectors';
 import '@rainbow-me/rainbowkit/styles.css';
 
-// Define Katana chain
-const katana = {
-  id: 747474,
-  name: 'Katana',
-  nativeCurrency: {
-    decimals: 18,
-    name: 'Ether',
-    symbol: 'ETH',
-  },
-  rpcUrls: {
-    default: { http: ['https://rpc.katana.network'] },
-    public: { http: ['https://rpc.katana.network'] },
-  },
-  blockExplorers: {
-    default: { name: 'Katana Explorer', url: 'https://explorer.katana.network' },
-  },
-} as const;
+const chains = [mainnet, base, arbitrum] as const;
+const transports = {
+  [mainnet.id]: http(process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://eth.llamarpc.com'),
+  [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
+  [arbitrum.id]: http(process.env.NEXT_PUBLIC_ARB_RPC_URL || 'https://arb1.arbitrum.io/rpc'),
+};
 
-const config = getDefaultConfig({
-  appName: 'Katana Intent',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo',
-  chains: [mainnet, base, katana],
-  transports: {
-    [mainnet.id]: http(process.env.NEXT_PUBLIC_ETH_RPC_URL || 'https://eth.llamarpc.com'),
-    [base.id]: http(process.env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org'),
-    [katana.id]: http('https://rpc.katana.network'),
-  },
+// Minimal SSR-safe config (no WalletConnect — just injected wallets)
+const ssrConfig = createConfig({
+  chains,
+  transports,
+  connectors: [injected()],
   ssr: true,
 });
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Dynamically import Header to avoid SSR issues
-const Header = dynamic(() => import('@/components/header').then(mod => mod.Header), { 
+const Header = dynamic(() => import('@/components/header').then(mod => mod.Header), {
   ssr: false,
   loading: () => (
-    <header className="border-b border-border/40 bg-background h-16">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
-          <span className="font-bold text-lg">Katana Intent</span>
+    <header className="border-b border-border/60 bg-gray-950/80 h-14">
+      <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600" />
+          <span className="font-semibold text-base text-gray-100">Katana<span className="text-indigo-400"> Intent</span></span>
         </div>
       </div>
     </header>
@@ -62,40 +64,45 @@ export function Providers({ children }: { children: ReactNode }) {
     setMounted(true);
   }, []);
 
+  // Full config with WalletConnect — only created client-side to avoid indexedDB SSR error
+  const config = useMemo(() => {
+    if (!mounted) return ssrConfig;
+    const connectors = connectorsForWallets(
+      [
+        {
+          groupName: 'Popular',
+          wallets: [rabbyWallet, metaMaskWallet, coinbaseWallet, walletConnectWallet, injectedWallet],
+        },
+      ],
+      {
+        appName: 'Katana Intent',
+        projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo',
+      }
+    );
+    return createConfig({
+      chains,
+      transports,
+      connectors,
+      ssr: true,
+    });
+  }, [mounted]);
+
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        {mounted ? (
-          <RainbowKitProvider
-            theme={darkTheme({
-              accentColor: '#8b5cf6',
-              accentColorForeground: 'white',
-              borderRadius: 'medium',
-              fontStack: 'system',
-            })}
-          >
-            <div className="min-h-screen flex flex-col bg-background">
-              <Header />
-              <main className="flex-1 flex flex-col">
-                {children}
-              </main>
-            </div>
-          </RainbowKitProvider>
-        ) : (
+        <RainbowKitProvider
+          theme={darkTheme({
+            accentColor: '#6366f1',
+            accentColorForeground: 'white',
+            borderRadius: 'medium',
+            fontStack: 'system',
+          })}
+        >
           <div className="min-h-screen flex flex-col bg-background">
-            <header className="border-b border-border/40 bg-background h-16">
-              <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
-                  <span className="font-bold text-lg">Katana Intent</span>
-                </div>
-              </div>
-            </header>
-            <main className="flex-1 flex flex-col">
-              {children}
-            </main>
+            <Header />
+            <main className="flex-1 flex flex-col">{children}</main>
           </div>
-        )}
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );

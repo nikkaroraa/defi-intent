@@ -13,7 +13,7 @@ import {
   zeroAddress,
 } from 'viem';
 import {
-  KATANA_CHAIN,
+  CHAIN,
   TOKENS,
   SUSHI_V2_FACTORY,
   SUSHI_V2_ROUTER,
@@ -69,12 +69,12 @@ export interface PriceQuote {
 export function createClient(): PublicClient {
   return createPublicClient({
     chain: {
-      id: KATANA_CHAIN.id,
-      name: KATANA_CHAIN.name,
+      id: CHAIN.id,
+      name: CHAIN.name,
       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-      rpcUrls: { default: { http: [KATANA_CHAIN.rpc] } },
+      rpcUrls: { default: { http: [CHAIN.rpc] } },
     },
-    transport: http(KATANA_CHAIN.rpc),
+    transport: http(CHAIN.rpc),
   });
 }
 

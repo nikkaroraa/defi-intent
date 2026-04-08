@@ -12,7 +12,7 @@ import {
   parseAbiItem,
 } from 'viem';
 import {
-  KATANA_CHAIN,
+  CHAIN,
   MORPHO_BLUE,
   MORPHO_BLUE_ABI,
   ORACLE_ABI,
@@ -73,12 +73,12 @@ export interface LiquidationOpportunity {
 export function createKatanaClient(): PublicClient {
   return createPublicClient({
     chain: {
-      id: KATANA_CHAIN.id,
-      name: KATANA_CHAIN.name,
+      id: CHAIN.id,
+      name: CHAIN.name,
       nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-      rpcUrls: { default: { http: [KATANA_CHAIN.rpc] } },
+      rpcUrls: { default: { http: [CHAIN.rpc] } },
     },
-    transport: http(KATANA_CHAIN.rpc),
+    transport: http(CHAIN.rpc),
   });
 }
 

@@ -1,88 +1,110 @@
 /**
  * Morpho Yield Adapter
- * Fetches lending yields from Morpho Blue markets
+ * Fetches lending yields from Morpho Blue markets via GraphQL API
  */
 
-import { createPublicClient, http, type Address, formatUnits } from "viem";
-import { katana, KATANA_RPC, CONTRACTS, TOKENS, type YieldOpportunity } from "../config.js";
+import { type Address } from "viem";
+import { type YieldOpportunity } from "../config.js";
 
-// Known Morpho markets on Katana (simplified - real impl would query factory)
-const MORPHO_MARKETS: {
-  id: string;
-  name: string;
-  loanToken: Address;
-  loanSymbol: string;
-  collateralToken: Address;
-  collateralSymbol: string;
-  estimatedApy: number; // placeholder until we can query real rates
-}[] = [
-  {
-    id: "morpho-usdc-weth",
-    name: "USDC/WETH Market",
-    loanToken: TOKENS.USDC.address,
-    loanSymbol: "USDC",
-    collateralToken: TOKENS.WETH.address,
-    collateralSymbol: "WETH",
-    estimatedApy: 0.045, // 4.5%
-  },
-  {
-    id: "morpho-usdc-wbtc",
-    name: "USDC/WBTC Market",
-    loanToken: TOKENS.USDC.address,
-    loanSymbol: "USDC",
-    collateralToken: TOKENS.WBTC.address,
-    collateralSymbol: "WBTC",
-    estimatedApy: 0.038, // 3.8%
-  },
-  {
-    id: "morpho-weth-wsteth",
-    name: "WETH/wstETH Market",
-    loanToken: TOKENS.WETH.address,
-    loanSymbol: "WETH",
-    collateralToken: TOKENS.wstETH.address,
-    collateralSymbol: "wstETH",
-    estimatedApy: 0.025, // 2.5%
-  },
-  {
-    id: "morpho-usdt-weth",
-    name: "USDT/WETH Market",
-    loanToken: TOKENS.USDT.address,
-    loanSymbol: "USDT",
-    collateralToken: TOKENS.WETH.address,
-    collateralSymbol: "WETH",
-    estimatedApy: 0.042, // 4.2%
-  },
-];
+const MORPHO_API = "https://blue-api.morpho.org/graphql";
+
+// Real Morpho Blue contract on Ethereum mainnet
+export const MORPHO_BLUE_ADDRESS = "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb" as Address;
+
+interface MorphoMarketResponse {
+  uniqueKey: string;
+  loanAsset: {
+    symbol: string;
+    address: string;
+    decimals: number;
+  };
+  collateralAsset: {
+    symbol: string;
+    address: string;
+  } | null;
+  state: {
+    supplyApy: number;
+    borrowApy: number;
+    supplyAssetsUsd: number;
+    borrowAssetsUsd: number;
+    utilization: number;
+  };
+  lltv: string;
+}
+
+const MARKETS_QUERY = `
+  query {
+    markets(
+      where: { chainId_in: [1, 8453] }
+      orderBy: SupplyAssetsUsd
+      first: 20
+    ) {
+      items {
+        uniqueKey
+        loanAsset {
+          symbol
+          address
+          decimals
+        }
+        collateralAsset {
+          symbol
+          address
+        }
+        state {
+          supplyApy
+          borrowApy
+          supplyAssetsUsd
+          borrowAssetsUsd
+          utilization
+        }
+        lltv
+      }
+    }
+  }
+`;
 
 /**
- * Fetch Morpho lending yields
+ * Fetch Morpho lending yields from the Morpho Blue API
  */
 export async function fetchMorphoYields(): Promise<YieldOpportunity[]> {
-  const client = createPublicClient({
-    chain: katana,
-    transport: http(KATANA_RPC),
-  });
-
-  const opportunities: YieldOpportunity[] = [];
-
-  for (const market of MORPHO_MARKETS) {
-    // In production, we'd query the actual market state for real APY
-    // For now, use estimated APYs
-    opportunities.push({
-      id: market.id,
-      protocol: "morpho",
-      name: market.name,
-      asset: market.loanSymbol,
-      assetAddress: market.loanToken,
-      apy: market.estimatedApy,
-      tvl: 0n, // TODO: query real TVL
-      contractAddress: CONTRACTS.MORPHO,
-      risk: "low",
-      description: `Lend ${market.loanSymbol} against ${market.collateralSymbol} collateral`,
+  try {
+    const res = await fetch(MORPHO_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: MARKETS_QUERY }),
     });
-  }
 
-  return opportunities;
+    if (!res.ok) {
+      console.error("Morpho API failed:", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    const markets: MorphoMarketResponse[] = data?.data?.markets?.items || [];
+
+    return markets
+      .filter((m) => m.state.supplyAssetsUsd > 100_000 && m.state.supplyApy > 0)
+      .map((market): YieldOpportunity => {
+        const collateral = market.collateralAsset?.symbol || "None";
+        const lltv = parseFloat(market.lltv) / 1e18;
+
+        return {
+          id: `morpho-${market.uniqueKey.slice(0, 10)}`,
+          protocol: "morpho",
+          name: `${market.loanAsset.symbol}/${collateral}`,
+          asset: market.loanAsset.symbol,
+          assetAddress: market.loanAsset.address as Address,
+          apy: market.state.supplyApy,
+          tvl: BigInt(Math.round(market.state.supplyAssetsUsd)),
+          contractAddress: MORPHO_BLUE_ADDRESS,
+          risk: market.state.utilization > 0.9 ? "high" : market.state.utilization > 0.7 ? "medium" : "low",
+          description: `Lend ${market.loanAsset.symbol} against ${collateral} (LLTV: ${(lltv * 100).toFixed(0)}%)`,
+        };
+      });
+  } catch (err) {
+    console.error("Morpho fetch error:", err);
+    return [];
+  }
 }
 
 /**

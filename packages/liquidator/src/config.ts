@@ -9,20 +9,19 @@ import { type Address } from 'viem';
 // CHAIN CONFIG
 // ===========================================
 
-export const KATANA_CHAIN = {
-  id: 747474,
-  name: 'Katana',
-  rpc: process.env.KATANA_RPC_URL || 'https://rpc.katana.network',
+export const CHAIN = {
+  id: 1,
+  name: 'Ethereum',
+  rpc: process.env.ETH_RPC_URL || 'https://eth.llamarpc.com',
 };
 
 // ===========================================
-// MORPHO BLUE CONTRACTS
+// MORPHO BLUE CONTRACTS (Ethereum Mainnet)
 // ===========================================
 
-export const MORPHO_BLUE = '0x0000000000000000000000000000000000000000' as Address; // TODO: Get actual address
-export const MORPHO_ORACLE = '0x0000000000000000000000000000000000000000' as Address;
+export const MORPHO_BLUE = '0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb' as Address;
 
-// Known markets on Katana (market ID = keccak256 of market params)
+// Known markets on Ethereum (market ID = keccak256 of market params)
 export interface Market {
   id: `0x${string}`;
   name: string;
@@ -33,13 +32,14 @@ export interface Market {
   lltv: bigint; // Liquidation LTV in WAD (1e18 = 100%)
 }
 
-// Common tokens on Katana
+// Common tokens on Ethereum mainnet
 export const TOKENS: Record<string, { address: Address; decimals: number; symbol: string }> = {
-  WETH: { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', decimals: 18, symbol: 'WETH' },
-  USDC: { address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36', decimals: 6, symbol: 'USDC' },
-  USDT: { address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2', decimals: 6, symbol: 'USDT' },
-  WBTC: { address: '0x0913da6da4b42f538b445599b46bb4622342cf52', decimals: 8, symbol: 'WBTC' },
-  DAI: { address: '0x4b6b9b31c72836806b0b1104cf1cdab8a0e3bd66', decimals: 18, symbol: 'DAI' },
+  WETH: { address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', decimals: 18, symbol: 'WETH' },
+  USDC: { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', decimals: 6, symbol: 'USDC' },
+  USDT: { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', decimals: 6, symbol: 'USDT' },
+  WBTC: { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', decimals: 8, symbol: 'WBTC' },
+  DAI: { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', decimals: 18, symbol: 'DAI' },
+  wstETH: { address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0', decimals: 18, symbol: 'wstETH' },
 };
 
 // ===========================================

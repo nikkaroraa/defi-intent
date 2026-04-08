@@ -5,7 +5,7 @@
 
 // Config
 export {
-  KATANA_CHAIN,
+  CHAIN,
   TOKENS,
   SUSHI_V2_FACTORY,
   SUSHI_V2_ROUTER,

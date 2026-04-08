@@ -5,7 +5,7 @@
 
 // Config
 export {
-  KATANA_CHAIN,
+  CHAIN,
   MORPHO_BLUE,
   MORPHO_BLUE_ABI,
   ORACLE_ABI,

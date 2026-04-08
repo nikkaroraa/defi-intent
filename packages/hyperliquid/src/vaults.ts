@@ -224,27 +224,67 @@ export interface HLPInfo {
 
 /**
  * Get HLP (Hyperliquid Liquidity Provider) info
- * HLP is the main protocol vault that provides liquidity
+ * Fetches real data from the Hyperliquid API
  */
 export async function getHLPInfo(client?: HyperliquidClient): Promise<HLPInfo> {
-  // In production, would fetch from actual HLP vault
-  // This is simulated data for demo
-  return {
-    tvl: 850_000_000, // $850M TVL
-    apy: 25.5, // 25.5% APY
-    positions: [
-      { coin: 'BTC', exposure: 125_000_000, weight: 0.147 },
-      { coin: 'ETH', exposure: 180_000_000, weight: 0.212 },
-      { coin: 'SOL', exposure: 95_000_000, weight: 0.112 },
-      { coin: 'HYPE', exposure: 75_000_000, weight: 0.088 },
-      { coin: 'Others', exposure: 375_000_000, weight: 0.441 },
-    ],
-    performance: {
-      daily: 0.07,
-      weekly: 0.52,
-      monthly: 2.13,
-    },
-  };
+  const hl = client || createHyperliquidClient();
+  const hlpAddress = KNOWN_VAULTS[0]?.address;
+
+  try {
+    const details = await hl.getVaultDetails(hlpAddress);
+    const tvl = parseFloat(details.portfolio?.accountValue || '0');
+    const apy = details.apr || 0;
+
+    // Build positions from vault portfolio
+    const positions: HLPInfo['positions'] = [];
+    const vaultPositions = details.portfolio?.positions || [];
+    const totalExposure = vaultPositions.reduce(
+      (sum, p) => sum + Math.abs(parseFloat(p.positionValue || '0')),
+      0
+    );
+
+    for (const pos of vaultPositions.slice(0, 5)) {
+      const exposure = Math.abs(parseFloat(pos.positionValue || '0'));
+      positions.push({
+        coin: pos.coin,
+        exposure,
+        weight: totalExposure > 0 ? exposure / totalExposure : 0,
+      });
+    }
+
+    // Calculate remaining as "Others"
+    if (vaultPositions.length > 5) {
+      const topExposure = positions.reduce((s, p) => s + p.exposure, 0);
+      const othersExposure = totalExposure - topExposure;
+      if (othersExposure > 0) {
+        positions.push({
+          coin: 'Others',
+          exposure: othersExposure,
+          weight: othersExposure / totalExposure,
+        });
+      }
+    }
+
+    return {
+      tvl,
+      apy,
+      positions,
+      performance: {
+        daily: apy / 365,
+        weekly: apy / 52,
+        monthly: apy / 12,
+      },
+    };
+  } catch (err) {
+    console.error('Failed to fetch HLP info:', err);
+    // Return empty data on failure
+    return {
+      tvl: 0,
+      apy: 0,
+      positions: [],
+      performance: { daily: 0, weekly: 0, monthly: 0 },
+    };
+  }
 }
 
 // ===========================================

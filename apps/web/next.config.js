@@ -1,10 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   transpilePackages: [
     '@katana-intent/shared',
     '@katana-intent/intent-engine',
     '@katana-intent/protocol-adapters',
+    '@katana-intent/yield',
+    '@katana-intent/liquidator',
+    '@katana-intent/hyperliquid',
+    '@katana-intent/mev',
+    '@katana-intent/bundler',
   ],
   webpack: (config, { isServer }) => {
     // Handle node modules that don't work in browser

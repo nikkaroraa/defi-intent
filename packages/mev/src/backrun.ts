@@ -14,7 +14,7 @@ import {
   decodeEventLog,
 } from 'viem';
 import {
-  KATANA_CHAIN,
+  CHAIN,
   TOKENS,
   SUSHI_V2_ROUTER,
   V2_PAIR_ABI,
@@ -205,7 +205,7 @@ export async function monitorBlocks(
   };
 
   // Poll every block time
-  const interval = setInterval(checkBlock, KATANA_CHAIN.blockTime);
+  const interval = setInterval(checkBlock, CHAIN.blockTime);
 
   // Return cleanup function
   return () => clearInterval(interval);

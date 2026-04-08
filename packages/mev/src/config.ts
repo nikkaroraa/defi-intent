@@ -9,15 +9,15 @@ import { type Address } from 'viem';
 // CHAIN CONFIG
 // ===========================================
 
-export const KATANA_CHAIN = {
-  id: 747474,
-  name: 'Katana',
-  rpc: process.env.KATANA_RPC_URL || 'https://rpc.katana.network',
-  blockTime: 2000, // 2 seconds
+export const CHAIN = {
+  id: 1,
+  name: 'Ethereum',
+  rpc: process.env.ETH_RPC_URL || 'https://eth.llamarpc.com',
+  blockTime: 12000, // 12 seconds
 };
 
 // ===========================================
-// TOKENS
+// TOKENS (Ethereum Mainnet)
 // ===========================================
 
 export interface Token {
@@ -27,36 +27,31 @@ export interface Token {
 }
 
 export const TOKENS: Record<string, Token> = {
-  WETH: { address: '0xee7d8bcfb72bc1880d0cf19822eb0a2e6577ab62', symbol: 'WETH', decimals: 18 },
-  USDC: { address: '0x203a662b0bd271a6ed5a60edfbd04bfce608fd36', symbol: 'USDC', decimals: 6 },
-  USDT: { address: '0x2dca96907fde857dd3d816880a0df407eeb2d2f2', symbol: 'USDT', decimals: 6 },
-  WBTC: { address: '0x0913da6da4b42f538b445599b46bb4622342cf52', symbol: 'WBTC', decimals: 8 },
-  DAI: { address: '0x4b6b9b31c72836806b0b1104cf1cdab8a0e3bd66', symbol: 'DAI', decimals: 18 },
+  WETH: { address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', symbol: 'WETH', decimals: 18 },
+  USDC: { address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', symbol: 'USDC', decimals: 6 },
+  USDT: { address: '0xdAC17F958D2ee523a2206206994597C13D831ec7', symbol: 'USDT', decimals: 6 },
+  WBTC: { address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599', symbol: 'WBTC', decimals: 8 },
+  DAI: { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', symbol: 'DAI', decimals: 18 },
 };
 
 // ===========================================
-// SUSHI V2
+// UNISWAP / SUSHI V2 (Ethereum Mainnet)
 // ===========================================
 
-export const SUSHI_V2_FACTORY = '0xFbc12984689e5f15626Bad03Ad60160Fe98B303C' as Address;
-export const SUSHI_V2_ROUTER = '0x69cc349932ae18ed406eeb917d79b9b3033fb68e' as Address;
+export const SUSHI_V2_FACTORY = '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac' as Address;
+export const SUSHI_V2_ROUTER = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F' as Address;
 
-// Known V2 pairs
-export const V2_PAIRS: Array<{ pair: Address; token0: string; token1: string }> = [
-  { pair: '0x0000000000000000000000000000000000000001' as Address, token0: 'WETH', token1: 'USDC' },
-  { pair: '0x0000000000000000000000000000000000000002' as Address, token0: 'WETH', token1: 'USDT' },
-  { pair: '0x0000000000000000000000000000000000000003' as Address, token0: 'WBTC', token1: 'WETH' },
-  { pair: '0x0000000000000000000000000000000000000004' as Address, token0: 'USDC', token1: 'USDT' },
-  { pair: '0x0000000000000000000000000000000000000005' as Address, token0: 'DAI', token1: 'USDC' },
-];
+// Pairs are discovered dynamically via factory.getPair()
+// No more hardcoded placeholder pairs
+export const V2_PAIRS: Array<{ pair: Address; token0: string; token1: string }> = [];
 
 // ===========================================
-// SUSHI V3
+// UNISWAP / SUSHI V3 (Ethereum Mainnet)
 // ===========================================
 
-export const SUSHI_V3_FACTORY = '0x0000000000000000000000000000000000000000' as Address;
-export const SUSHI_V3_ROUTER = '0x0000000000000000000000000000000000000000' as Address;
-export const SUSHI_V3_QUOTER = '0x0000000000000000000000000000000000000000' as Address;
+export const SUSHI_V3_FACTORY = '0xbACEB8eC6b9355Dfc0269C18bac9d6E2Bdc29C4F' as Address;
+export const SUSHI_V3_ROUTER = '0x2E6cd2d30aa43f40aa81619571E4540289c57900' as Address;
+export const SUSHI_V3_QUOTER = '0x64e8802FE490fa7cc61d3c7862aF1dE5BC49f4F3' as Address;
 
 // V3 fee tiers
 export const V3_FEE_TIERS = [500, 3000, 10000] as const; // 0.05%, 0.3%, 1%

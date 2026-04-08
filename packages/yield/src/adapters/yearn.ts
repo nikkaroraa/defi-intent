@@ -1,91 +1,87 @@
 /**
  * Yearn Yield Adapter
- * Fetches vault yields from Yearn on Katana
+ * Fetches vault yields from Yearn via yDaemon API
  */
 
-import { createPublicClient, http, type Address } from "viem";
-import { katana, KATANA_RPC, TOKENS, type YieldOpportunity } from "../config.js";
+import { type Address } from "viem";
+import { type YieldOpportunity } from "../config.js";
 
-// Known Yearn vaults on Katana (placeholder addresses - need real deployment)
-const YEARN_VAULTS: {
-  id: string;
+interface YearnVaultResponse {
+  address: string;
   name: string;
-  address: Address;
-  asset: string;
-  assetAddress: Address;
-  estimatedApy: number;
-  strategy: string;
-}[] = [
-  {
-    id: "yearn-usdc",
-    name: "Yearn USDC Vault",
-    address: "0x0000000000000000000000000000000000000001" as Address, // TODO: real address
-    asset: "USDC",
-    assetAddress: TOKENS.USDC.address,
-    estimatedApy: 0.062, // 6.2%
-    strategy: "Multi-strategy USDC optimization",
-  },
-  {
-    id: "yearn-weth",
-    name: "Yearn WETH Vault",
-    address: "0x0000000000000000000000000000000000000002" as Address, // TODO: real address
-    asset: "WETH",
-    assetAddress: TOKENS.WETH.address,
-    estimatedApy: 0.035, // 3.5%
-    strategy: "ETH staking + lending optimization",
-  },
-  {
-    id: "yearn-wbtc",
-    name: "Yearn WBTC Vault",
-    address: "0x0000000000000000000000000000000000000003" as Address, // TODO: real address
-    asset: "WBTC",
-    assetAddress: TOKENS.WBTC.address,
-    estimatedApy: 0.028, // 2.8%
-    strategy: "BTC lending optimization",
-  },
+  symbol: string;
+  token: {
+    address: string;
+    symbol: string;
+    decimals: number;
+  };
+  apr: {
+    netAPR: number;
+    forwardAPR?: {
+      netAPR: number;
+    };
+  };
+  tvl: {
+    totalAssets: string;
+    tvl: number;
+  };
+  version: string;
+  kind: string;
+}
+
+const YDAEMON_URLS = [
+  { chainId: 1, name: "Ethereum", url: "https://ydaemon.yearn.fi/1/vaults/all" },
+  { chainId: 8453, name: "Base", url: "https://ydaemon.yearn.fi/8453/vaults/all" },
 ];
 
 /**
- * Fetch Yearn vault yields
+ * Fetch Yearn vault yields from yDaemon
  */
 export async function fetchYearnYields(): Promise<YieldOpportunity[]> {
-  const opportunities: YieldOpportunity[] = [];
+  const allYields: YieldOpportunity[] = [];
 
-  for (const vault of YEARN_VAULTS) {
-    // Skip placeholder vaults (address starts with 0x0000000000000000000000000000000000000)
-    if (vault.address.startsWith("0x000000000000000000000000000000000000000")) {
-      // Still include with a note that it's not yet deployed
-      opportunities.push({
-        id: vault.id,
-        protocol: "yearn",
-        name: vault.name,
-        asset: vault.asset,
-        assetAddress: vault.assetAddress,
-        apy: vault.estimatedApy,
-        tvl: 0n,
-        contractAddress: vault.address,
-        risk: "medium",
-        description: `${vault.strategy} (Coming soon)`,
-      });
-      continue;
+  const fetches = YDAEMON_URLS.map(async (chain) => {
+    try {
+      const res = await fetch(chain.url);
+      if (!res.ok) {
+        console.error(`Yearn yDaemon failed for ${chain.name}:`, res.status);
+        return [];
+      }
+
+      const vaults: YearnVaultResponse[] = await res.json();
+
+      return vaults
+        .filter((v) => v.tvl.tvl > 50_000 && v.apr.netAPR > 0)
+        .map((vault): YieldOpportunity => {
+          const apy = vault.apr.forwardAPR?.netAPR || vault.apr.netAPR;
+
+          return {
+            id: `yearn-${vault.address.slice(0, 10)}-${chain.chainId}`,
+            protocol: "yearn",
+            name: vault.name || `Yearn ${vault.token.symbol}`,
+            asset: vault.token.symbol,
+            assetAddress: vault.token.address as Address,
+            apy,
+            tvl: BigInt(Math.round(vault.tvl.tvl)),
+            contractAddress: vault.address as Address,
+            risk: apy > 0.15 ? "high" : apy > 0.05 ? "medium" : "low",
+            description: `Yearn ${vault.kind || "vault"} on ${chain.name} (v${vault.version})`,
+          };
+        });
+    } catch (err) {
+      console.error(`Yearn fetch error for ${chain.name}:`, err);
+      return [];
     }
+  });
 
-    // In production, query real vault for APY
-    opportunities.push({
-      id: vault.id,
-      protocol: "yearn",
-      name: vault.name,
-      asset: vault.asset,
-      assetAddress: vault.assetAddress,
-      apy: vault.estimatedApy,
-      tvl: 0n,
-      contractAddress: vault.address,
-      risk: "medium",
-      description: vault.strategy,
-    });
+  const results = await Promise.allSettled(fetches);
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      allYields.push(...result.value);
+    }
   }
 
-  return opportunities;
+  return allYields;
 }
 
 /**

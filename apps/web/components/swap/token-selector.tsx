@@ -56,7 +56,7 @@ export function TokenSelector({ tokens, selectedToken, onSelect, excludeToken }:
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 w-48 mt-2 bg-gray-800 border border-gray-700 rounded-xl shadow-xl overflow-hidden">
+        <div className="absolute right-0 z-50 w-48 mt-2 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
           {filteredTokens.map((token) => (
             <button
               key={token.address}
@@ -65,7 +65,7 @@ export function TokenSelector({ tokens, selectedToken, onSelect, excludeToken }:
                 onSelect(token);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-700 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent transition-colors"
             >
               {token.logoURI && (
                 <img src={token.logoURI} alt={token.symbol} className="w-7 h-7 rounded-full" />

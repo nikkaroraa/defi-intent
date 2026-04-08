@@ -6,7 +6,7 @@ export default function SwapPage() {
       <div className="w-full max-w-lg">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Swap on Katana</h1>
-          <p className="text-gray-400">Best rates via Sushi V2/V3</p>
+          <p className="text-muted-foreground">Best rates via Sushi V2/V3</p>
         </div>
         <SwapCard />
       </div>

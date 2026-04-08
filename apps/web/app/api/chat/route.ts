@@ -210,15 +210,32 @@ export async function POST(request: NextRequest) {
             break;
 
           case 'positions':
-            response = "📊 **Your Positions:**\n\nNo active positions found. Try depositing into a yield protocol!";
+            response = "📊 **Your Positions:**\n\nNo active positions found. Try depositing into a yield protocol!\n\nCheck the **Yields** tab to find the best opportunities across Ethereum and Base.";
             break;
 
           case 'yields':
-            response = "📈 **Best Yields on Katana:**\n\n• **Yearn USDC**: 8.5% APY\n• **Morpho USDC/ETH**: 12.3% APY\n• **Spectra PT-USDC**: 15.2% APY (fixed)\n\nWant me to deposit into any of these?";
+            // Fetch real yield data
+            try {
+              const yieldsRes = await fetch(new URL('/api/yields', request.url));
+              const yieldsData = await yieldsRes.json();
+              const topYields = (yieldsData.yields || []).slice(0, 5);
+
+              if (topYields.length > 0) {
+                const yieldLines = topYields.map((y: any) =>
+                  `• **${y.protocol} ${y.asset}** (${y.chainName}): ${(y.apy * 100).toFixed(2)}% APY`
+                );
+                response = `📈 **Best Yields (Live):**\n\n${yieldLines.join('\n')}\n\nWant me to deposit into any of these?`;
+                data = { yields: topYields };
+              } else {
+                response = "📈 **Yields:** Fetching live data... Try again in a moment.";
+              }
+            } catch {
+              response = "📈 **Yields:** Unable to fetch live data right now. Check the Yields tab for current rates.";
+            }
             break;
 
           case 'risk':
-            response = "✅ **Risk Assessment:**\n\nNo active lending positions found. You're safe from liquidation!\n\nWhen you borrow, I'll monitor your health factor.";
+            response = "✅ **Risk Assessment:**\n\nNo active lending positions detected on-chain.\n\nWhen you have active Morpho or Aave positions, I'll monitor your health factor and warn you before liquidation.";
             break;
 
           default:
