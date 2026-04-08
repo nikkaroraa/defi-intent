@@ -8,7 +8,7 @@ import {
   createPublicClient,
   http,
 } from "viem";
-import { defi-intent, L2_RPC, CONTRACTS, MULTICALL3_ABI } from "./config.js";
+import { l2Chain, L2_RPC, CONTRACTS, MULTICALL3_ABI } from "./config.js";
 import {
   type Call,
   type SwapParams,
@@ -157,7 +157,7 @@ export class BatchBuilder {
     error?: string;
   }> {
     const client = createPublicClient({
-      chain: defi-intent,
+      chain: l2Chain,
       transport: http(L2_RPC),
     });
 

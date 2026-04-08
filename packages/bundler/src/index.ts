@@ -18,4 +18,4 @@ export {
   encodeWrapETH,
   encodeUnwrapETH,
 } from "./actions.js";
-export { CONTRACTS, TOKENS, defi-intent } from "./config.js";
+export { CONTRACTS, TOKENS, l2Chain } from "./config.js";

@@ -78,7 +78,7 @@ export const KATANA_CHAIN: ChainConfig = {
   id: 1911, // DeFi Intent mainnet
   name: 'DeFi Intent',
   rpcUrl: 'https://rpc.example.network',
-  explorerUrl: 'https://explorer.defi-intent.network',
+  explorerUrl: 'https://explorer.example.network',
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',

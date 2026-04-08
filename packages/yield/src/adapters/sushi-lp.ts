@@ -4,7 +4,7 @@
  */
 
 import { createPublicClient, http, type Address, formatUnits } from "viem";
-import { defi-intent, L2_RPC, CONTRACTS, TOKENS, type YieldOpportunity } from "../config.js";
+import { l2Chain, L2_RPC, CONTRACTS, TOKENS, type YieldOpportunity } from "../config.js";
 
 // V2 Pair ABI (minimal)
 const PAIR_ABI = [
@@ -74,7 +74,7 @@ const SUSHI_POOLS: {
  */
 export async function fetchSushiLPYields(): Promise<YieldOpportunity[]> {
   const client = createPublicClient({
-    chain: defi-intent,
+    chain: l2Chain,
     transport: http(L2_RPC),
   });
 

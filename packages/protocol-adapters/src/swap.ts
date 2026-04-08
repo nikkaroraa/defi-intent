@@ -18,7 +18,7 @@ import {
 // KATANA CONFIG
 // ===========================================
 
-const defi-intent = {
+const l2Chain = {
   id: 747474,
   name: 'DeFi Intent',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
@@ -215,7 +215,7 @@ let client: ReturnType<typeof createPublicClient> | null = null;
 function getClient() {
   if (!client) {
     client = createPublicClient({
-      chain: defi-intent,
+      chain: l2Chain,
       transport: http(L2_RPC, { timeout: 15000 }),
     });
   }

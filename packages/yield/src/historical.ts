@@ -162,7 +162,7 @@ function calculateStdDev(values: number[]): number {
 const CHAIN_MAP: Record<string, string> = {
   ethereum: 'Ethereum',
   base: 'Base',
-  defi-intent: 'DeFi Intent',
+  l2: 'DeFi Intent',
 };
 
 const PROTOCOL_MAP: Record<string, Protocol> = {
