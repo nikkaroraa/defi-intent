@@ -7,12 +7,14 @@ import { motion } from 'framer-motion';
 export default function HistoryPage() {
   const { messages, clearMessages } = useChatStore();
 
-  const groupedByDate = messages.reduce((acc, msg) => {
+  const groupedByDate = messages.reduce<Record<string, typeof messages>>((acc, msg) => {
     const date = new Date(msg.timestamp).toLocaleDateString();
     if (!acc[date]) acc[date] = [];
     acc[date].push(msg);
     return acc;
-  }, {} as Record<string, typeof messages>);
+  }, {});
+
+  const groupedEntries = Object.entries(groupedByDate) as Array<[string, typeof messages]>;
 
   return (
     <div className="container mx-auto max-w-3xl py-8 px-4">
@@ -48,7 +50,7 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="space-y-8">
-          {Object.entries(groupedByDate).reverse().map(([date, msgs]) => (
+          {groupedEntries.reverse().map(([date, msgs]) => (
             <motion.div
               key={date}
               initial={{ opacity: 0, y: 10 }}

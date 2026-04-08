@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
+import { useState, KeyboardEvent, useRef } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,11 +12,20 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, disabled, isLoading }: ChatInputProps) {
   const [input, setInput] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const resizeTextarea = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  };
 
   const handleSubmit = () => {
     if (!input.trim() || disabled || isLoading) return;
     onSend(input.trim());
     setInput('');
+    requestAnimationFrame(resizeTextarea);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -32,10 +41,14 @@ export function ChatInput({ onSend, disabled, isLoading }: ChatInputProps) {
         <div className="flex gap-3 items-end">
           <div className="flex-1 relative">
             <textarea
+              ref={textareaRef}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                requestAnimationFrame(resizeTextarea);
+              }}
               onKeyDown={handleKeyDown}
-              placeholder={disabled ? "Connect wallet to chat..." : "Ask about yields, swaps, positions..."}
+              placeholder={disabled ? "Chat is temporarily unavailable..." : "Ask about yields, swaps, positions..."}
               disabled={disabled || isLoading}
               rows={1}
               className={cn(

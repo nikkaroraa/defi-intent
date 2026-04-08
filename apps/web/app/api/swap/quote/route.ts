@@ -352,8 +352,11 @@ async function getV3Quote(
   dexName: string,
   fromAddr: Address,
   toAddr: Address,
-  amountIn: bigint
+  amountIn: bigint,
+  allowNativeOut = true
 ): Promise<Quote | null> {
+  if (!allowNativeOut) return null;
+
   const fees = [500, 3000, 10000]; // 0.05%, 0.3%, 1%
   let bestOut = BigInt(0);
   let bestFee = 3000;
@@ -477,6 +480,10 @@ export async function GET(request: NextRequest) {
     });
 
     const amountInWei = parseUnits(amount, tokenIn.decimals);
+    if (amountInWei <= BigInt(0)) {
+      return NextResponse.json({ error: 'Amount must be greater than 0' }, { status: 400 });
+    }
+
     const fromAddr = tokenIn.address === zeroAddress ? chain.weth : tokenIn.address;
     const toAddr = tokenOut.address === zeroAddress ? chain.weth : tokenOut.address;
 
@@ -485,7 +492,7 @@ export async function GET(request: NextRequest) {
       if (dex.type === 'v2') {
         return getV2Quote(client, dex.router, dex.name, fromAddr, toAddr, chain.weth, amountInWei);
       } else if (dex.type === 'v3' && dex.quoter) {
-        return getV3Quote(client, dex.quoter, dex.name, fromAddr, toAddr, amountInWei);
+        return getV3Quote(client, dex.quoter, dex.name, fromAddr, toAddr, amountInWei, tokenOut.address !== zeroAddress);
       } else if (dex.type === 'aerodrome') {
         return getAerodromeQuote(client, dex.router, dex.name, fromAddr, toAddr, chain.weth, amountInWei);
       }
@@ -500,7 +507,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Sort by amountOut
-    quotes.sort((a, b) => (b.amountOut > a.amountOut ? 1 : -1));
+    quotes.sort((a, b) => (a.amountOut === b.amountOut ? 0 : b.amountOut > a.amountOut ? 1 : -1));
     const best = quotes[0];
 
     // Calculate slippage

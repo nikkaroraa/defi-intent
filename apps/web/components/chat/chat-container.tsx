@@ -25,8 +25,6 @@ export function ChatContainer() {
   }, [messages, isLoading]);
 
   const handleSendMessage = async (content: string) => {
-    if (!address) return;
-
     // Add user message
     const userMessage = {
       id: generateMessageId(),
@@ -44,11 +42,15 @@ export function ChatContainer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: content,
-          walletAddress: address,
+          walletAddress: address ?? null,
         }),
       });
 
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process chat request');
+      }
 
       // Add assistant response
       const assistantMessage = {
@@ -107,36 +109,36 @@ export function ChatContainer() {
                 DeFi copilot. Ask about yields, execute swaps, check positions, or explore protocols across Ethereum, Base, and Arbitrum.
               </p>
 
-              {!isConnected ? (
-                <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border">
+              {!isConnected && (
+                <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border mb-6">
                   <Wallet className="w-5 h-5 text-muted-foreground shrink-0" />
                   <div className="flex-1">
-                    <p className="text-sm text-foreground font-medium">Connect wallet to start</p>
-                    <p className="text-xs text-muted-foreground">Supports MetaMask, Rabby, Coinbase, WalletConnect</p>
+                    <p className="text-sm text-foreground font-medium">Connect wallet for balances and execution</p>
+                    <p className="text-xs text-muted-foreground">You can still ask general questions without connecting.</p>
                   </div>
                   <ConnectButton />
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-3">Try asking</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      'Show my balances',
-                      'Best yield for USDC?',
-                      'Check my positions',
-                      'Swap 0.1 ETH to USDC',
-                    ].map((example) => (
-                      <button
-                        key={example}
-                        onClick={() => handleSendMessage(example)}
-                        className="px-3 py-2.5 rounded-lg bg-card border border-border text-sm text-left hover:bg-accent hover:border-indigo-500/30 transition-all"
-                      >
-                        {example}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               )}
+
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-3">Try asking</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    'Best yield for USDC?',
+                    'What is the safest stablecoin yield right now?',
+                    'Show my balances',
+                    'Swap 0.1 ETH to USDC',
+                  ].map((example) => (
+                    <button
+                      key={example}
+                      onClick={() => handleSendMessage(example)}
+                      className="px-3 py-2.5 rounded-lg bg-card border border-border text-sm text-left hover:bg-accent hover:border-indigo-500/30 transition-all"
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </motion.div>
           )}
 
@@ -158,7 +160,7 @@ export function ChatContainer() {
       {/* Input area */}
       <ChatInput
         onSend={handleSendMessage}
-        disabled={!isConnected}
+        disabled={false}
         isLoading={isLoading}
       />
     </div>

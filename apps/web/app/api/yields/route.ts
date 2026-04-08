@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { fetchDefiLlamaYields, type NormalizedYield } from './lib/defillama';
 import { fetchMorphoYields } from './lib/morpho';
 import { fetchYearnYields } from './lib/yearn';

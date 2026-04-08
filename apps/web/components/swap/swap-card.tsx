@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useBalance, useSendTransaction, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
+import { useAccount, useBalance, usePublicClient, useSwitchChain, useWalletClient } from 'wagmi';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { formatUnits, type Address, type Hex } from 'viem';
 import { TokenSelector, type Token } from './token-selector';
@@ -79,7 +79,8 @@ async function fetchQuote(
 
 export function SwapCard() {
   const { address, isConnected, chainId: walletChainId } = useAccount();
-  const { switchChain } = useSwitchChain();
+  const { data: walletClient } = useWalletClient();
+  const { switchChainAsync } = useSwitchChain();
   const { openConnectModal } = useConnectModal();
 
   const [selectedChain, setSelectedChain] = useState<Chain>(CHAINS[1]); // Default to Base
@@ -88,10 +89,13 @@ export function SwapCard() {
   const [amountIn, setAmountIn] = useState('');
   const [quote, setQuote] = useState<SwapQuote | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState<string | null>(null);
 
   // Get tokens for selected chain
   const tokens = TOKENS_BY_CHAIN[selectedChain.id] || [];
+  const publicClient = usePublicClient({ chainId: selectedChain.id });
 
   // Initialize tokens when chain changes
   useEffect(() => {
@@ -113,9 +117,6 @@ export function SwapCard() {
     chainId: selectedChain.id,
   });
 
-  // Transaction state
-  const { sendTransaction, data: txHash, isPending: isSending } = useSendTransaction();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
   // Fetch quote when inputs change
   useEffect(() => {
@@ -156,30 +157,54 @@ export function SwapCard() {
   const handleChainChange = (chain: Chain) => {
     setSelectedChain(chain);
     // Also switch wallet chain
-    if (switchChain && walletChainId !== chain.id) {
-      switchChain({ chainId: chain.id });
+    if (walletChainId !== chain.id) {
+      switchChainAsync({ chainId: chain.id }).catch((err) => {
+        console.error('Chain switch failed:', err);
+      });
     }
   };
 
   // Execute swap
   const handleSwap = async () => {
-    if (!quote || !quote.txs.length) return;
+    if (!quote || !quote.txs.length || !walletClient || !publicClient || !address) return;
 
-    // Check if wallet is on correct chain
-    if (walletChainId !== selectedChain.id) {
-      if (switchChain) {
-        switchChain({ chainId: selectedChain.id });
+    try {
+      setError(null);
+      setStatus(null);
+
+      if (walletChainId !== selectedChain.id) {
+        await switchChainAsync({ chainId: selectedChain.id });
+        setStatus(`Switched to ${selectedChain.name}. Review the transaction and submit again.`);
+        return;
       }
-      return;
-    }
 
-    // Execute the swap tx (last one in the array)
-    const tx = quote.txs[quote.txs.length - 1];
-    sendTransaction({
-      to: tx.to,
-      data: tx.data,
-      value: BigInt(tx.value),
-    });
+      setIsExecuting(true);
+
+      for (let i = 0; i < quote.txs.length; i++) {
+        const tx = quote.txs[i];
+        const isApproval = i < quote.txs.length - 1;
+        setStatus(isApproval ? 'Awaiting token approval…' : 'Submitting swap…');
+
+        const hash = await walletClient.sendTransaction({
+          account: address,
+          chain: walletClient.chain,
+          to: tx.to,
+          data: tx.data,
+          value: BigInt(tx.value),
+        });
+
+        setStatus(isApproval ? 'Approval submitted. Waiting for confirmation…' : 'Swap submitted. Waiting for confirmation…');
+        await publicClient.waitForTransactionReceipt({ hash });
+      }
+
+      setStatus('Swap successful!');
+    } catch (err) {
+      console.error('Swap execution failed:', err);
+      setError(err instanceof Error ? err.message : 'Swap failed');
+      setStatus(null);
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   // Set max balance
@@ -298,10 +323,10 @@ export function SwapCard() {
           </div>
         )}
 
-        {/* Success */}
-        {isSuccess && (
-          <div className="mt-4 p-3 bg-green-900/30 border border-green-800 rounded-xl text-green-400 text-sm">
-            Swap successful!
+        {/* Status */}
+        {status && (
+          <div className="mt-4 p-3 bg-blue-900/30 border border-blue-800 rounded-xl text-blue-300 text-sm">
+            {status}
           </div>
         )}
 
@@ -311,22 +336,22 @@ export function SwapCard() {
             if (!isConnected) {
               openConnectModal?.();
             } else if (needsChainSwitch) {
-              switchChain?.({ chainId: selectedChain.id });
+              switchChainAsync({ chainId: selectedChain.id }).catch((err) => {
+                console.error('Chain switch failed:', err);
+              });
             } else {
               handleSwap();
             }
           }}
-          disabled={isConnected && !needsChainSwitch && !quote || isSending || isConfirming}
+          disabled={(isConnected && !needsChainSwitch && !quote) || isExecuting}
           className="w-full mt-4 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {!isConnected
             ? 'Connect Wallet'
             : needsChainSwitch
             ? `Switch to ${selectedChain.name}`
-            : isSending
-            ? 'Confirm in Wallet...'
-            : isConfirming
-            ? 'Swapping...'
+            : isExecuting
+            ? 'Processing...'
             : 'Swap'}
         </button>
       </div>

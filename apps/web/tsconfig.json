@@ -17,8 +17,12 @@
         "name": "next"
       }
     ],
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@defi-intent/shared": ["../../packages/shared/src/index.ts"],
+      "@defi-intent/intent-engine": ["../../packages/intent-engine/src/index.ts"],
+      "@defi-intent/protocol-adapters": ["../../packages/protocol-adapters/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

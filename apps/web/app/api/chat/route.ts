@@ -61,6 +61,43 @@ function quickParse(input: string): Intent | null {
     return { type: 'query', query: 'yields', confidence: 0.9, rawInput: input };
   }
 
+  const amountMatch = normalized.match(/(\d*\.?\d+|half|all)\s+([a-z0-9]+)/i);
+  const swapMatch = normalized.match(/(?:swap|exchange|convert)\s+(\d*\.?\d+|half|all)?\s*([a-z0-9]+)?\s*(?:to|for|into)\s+([a-z0-9]+)/i);
+  if (swapMatch) {
+    return {
+      type: 'swap',
+      amount: swapMatch[1] || amountMatch?.[1],
+      tokenIn: (swapMatch[2] || amountMatch?.[2] || undefined)?.toUpperCase(),
+      tokenOut: swapMatch[3]?.toUpperCase(),
+      confidence: 0.88,
+      rawInput: input,
+    };
+  }
+
+  const depositMatch = normalized.match(/(?:deposit|supply|lend)\s+(\d*\.?\d+|half|all)?\s*([a-z0-9]+)?(?:\s+(?:into|to))?\s*([a-z0-9-]+)?/i);
+  if (depositMatch && (depositMatch[1] || depositMatch[2])) {
+    return {
+      type: 'deposit',
+      amount: depositMatch[1] || undefined,
+      tokenIn: depositMatch[2]?.toUpperCase(),
+      protocol: depositMatch[3]?.toLowerCase(),
+      confidence: 0.8,
+      rawInput: input,
+    };
+  }
+
+  const withdrawMatch = normalized.match(/(?:withdraw|redeem|unstake)\s+(\d*\.?\d+|half|all)?\s*([a-z0-9]+)?(?:\s+(?:from))?\s*([a-z0-9-]+)?/i);
+  if (withdrawMatch && (withdrawMatch[1] || withdrawMatch[2])) {
+    return {
+      type: 'withdraw',
+      amount: withdrawMatch[1] || undefined,
+      tokenIn: withdrawMatch[2]?.toUpperCase(),
+      protocol: withdrawMatch[3]?.toLowerCase(),
+      confidence: 0.78,
+      rawInput: input,
+    };
+  }
+
   return null;
 }
 
@@ -151,9 +188,9 @@ export async function POST(request: NextRequest) {
   try {
     const { message, walletAddress } = await request.json();
 
-    if (!message || !walletAddress) {
+    if (!message) {
       return NextResponse.json(
-        { error: 'Missing message or wallet address' },
+        { error: 'Missing message' },
         { status: 400 }
       );
     }
@@ -204,13 +241,19 @@ export async function POST(request: NextRequest) {
       case 'query':
         switch (intent.query) {
           case 'balance':
+            if (!walletAddress) {
+              response = 'Connect your wallet and I can show your live on-chain balances.';
+              break;
+            }
             const balances = await fetchBalances(walletAddress as Address);
             data = { balances };
             response = formatBalanceResponse(balances);
             break;
 
           case 'positions':
-            response = "📊 **Your Positions:**\n\nNo active positions found. Try depositing into a yield protocol!\n\nCheck the **Yields** tab to find the best opportunities across Ethereum and Base.";
+            response = walletAddress
+              ? "📊 **Your Positions:**\n\nNo active positions found yet. Try depositing into a yield protocol.\n\nCheck the **Yields** tab to find the best opportunities across Ethereum, Base, and Arbitrum."
+              : 'Connect your wallet and I can inspect your live positions across supported chains.';
             break;
 
           case 'yields':
@@ -235,7 +278,9 @@ export async function POST(request: NextRequest) {
             break;
 
           case 'risk':
-            response = "✅ **Risk Assessment:**\n\nNo active lending positions detected on-chain.\n\nWhen you have active Morpho or Aave positions, I'll monitor your health factor and warn you before liquidation.";
+            response = walletAddress
+              ? "✅ **Risk Assessment:**\n\nNo active lending positions detected on-chain.\n\nWhen you have active Morpho or Aave positions, I'll monitor your health factor and warn you before liquidation."
+              : 'Connect your wallet and I can check your lending risk and liquidation exposure.';
             break;
 
           default:
@@ -244,7 +289,7 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'swap':
-        response = `🔄 **Swap Preview:**\n\nSwap ${intent.amount || '?'} ${intent.tokenIn || '?'} → ${intent.tokenOut || '?'}\n\n*Coming soon! This will route through Sushi for best rates.*`;
+        response = `🔄 **Swap Preview:**\n\nSwap ${intent.amount || '?'} ${intent.tokenIn || '?'} → ${intent.tokenOut || '?'}\n\nOpen the **Swap** page to fetch a live quote and execute this trade.`;
         break;
 
       case 'deposit':
