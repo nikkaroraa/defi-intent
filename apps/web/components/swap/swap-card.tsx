@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAccount, useBalance, useSendTransaction, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { formatUnits, type Address, type Hex } from 'viem';
 import { TokenSelector, type Token } from './token-selector';
 import { ChainSelector, CHAINS, type Chain } from './chain-selector';
@@ -79,6 +80,7 @@ async function fetchQuote(
 export function SwapCard() {
   const { address, isConnected, chainId: walletChainId } = useAccount();
   const { switchChain } = useSwitchChain();
+  const { openConnectModal } = useConnectModal();
 
   const [selectedChain, setSelectedChain] = useState<Chain>(CHAINS[1]); // Default to Base
   const [tokenIn, setTokenIn] = useState<Token | null>(null);
@@ -305,8 +307,16 @@ export function SwapCard() {
 
         {/* Swap button */}
         <button
-          onClick={handleSwap}
-          disabled={!isConnected || (!quote && !needsChainSwitch) || isSending || isConfirming}
+          onClick={() => {
+            if (!isConnected) {
+              openConnectModal?.();
+            } else if (needsChainSwitch) {
+              switchChain?.({ chainId: selectedChain.id });
+            } else {
+              handleSwap();
+            }
+          }}
+          disabled={isConnected && !needsChainSwitch && !quote || isSending || isConfirming}
           className="w-full mt-4 py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {!isConnected
