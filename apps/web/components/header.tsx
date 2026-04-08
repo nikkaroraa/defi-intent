@@ -62,7 +62,7 @@ export function Header() {
             <Sword className="w-4 h-4 text-white" />
           </div>
           <span className="font-semibold text-base text-gray-100">
-            Katana<span className="text-indigo-400"> Intent</span>
+            DeFi<span className="text-indigo-400"> Intent</span>
           </span>
         </Link>
 

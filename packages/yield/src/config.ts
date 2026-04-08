@@ -1,5 +1,5 @@
 /**
- * Katana Yield Hub - Configuration
+ * Yield Hub - Configuration
  */
 
 import { type Address, type Chain } from "viem";
@@ -8,23 +8,23 @@ import { type Address, type Chain } from "viem";
 // KATANA CHAIN
 // ===========================================
 
-export const katana: Chain = {
+export const l2Chain: Chain = {
   id: 747474,
-  name: "Katana",
+  name: "L2",
   nativeCurrency: {
     decimals: 18,
     name: "Ether",
     symbol: "ETH",
   },
   rpcUrls: {
-    default: { http: ["https://rpc.katana.network"] },
+    default: { http: ["https://rpc.example.network"] },
   },
   blockExplorers: {
-    default: { name: "KatanaScan", url: "https://katanascan.com" },
+    default: { name: "Explorer", url: "https://explorer.example.com" },
   },
 };
 
-export const KATANA_RPC = process.env.KATANA_RPC_URL || "https://rpc.katana.network";
+export const L2_RPC = process.env.L2_RPC_URL || "https://rpc.example.network";
 
 // ===========================================
 // PROTOCOL CONTRACTS

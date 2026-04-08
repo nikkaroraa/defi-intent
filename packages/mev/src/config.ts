@@ -1,6 +1,6 @@
 /**
  * MEV Bot Configuration
- * Katana DEX addresses and ABIs
+ * DEX addresses and ABIs
  */
 
 import { type Address } from 'viem';

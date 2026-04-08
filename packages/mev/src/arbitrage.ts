@@ -1,6 +1,6 @@
 /**
  * Arbitrage Scanner
- * Finds profitable arbitrage opportunities across Katana DEXs
+ * Finds profitable arbitrage opportunities across DEXs
  */
 
 import {

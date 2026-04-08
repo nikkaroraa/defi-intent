@@ -1,10 +1,10 @@
 /**
  * Sushi LP Yield Adapter
- * Fetches LP yields from Sushi V2/V3 on Katana
+ * Fetches LP yields from Sushi V2/V3 across chains
  */
 
 import { createPublicClient, http, type Address, formatUnits } from "viem";
-import { katana, KATANA_RPC, CONTRACTS, TOKENS, type YieldOpportunity } from "../config.js";
+import { defi-intent, L2_RPC, CONTRACTS, TOKENS, type YieldOpportunity } from "../config.js";
 
 // V2 Pair ABI (minimal)
 const PAIR_ABI = [
@@ -28,7 +28,7 @@ const PAIR_ABI = [
   },
 ] as const;
 
-// Known Sushi LP pools on Katana
+// Known Sushi LP pools across chains
 const SUSHI_POOLS: {
   id: string;
   name: string;
@@ -74,8 +74,8 @@ const SUSHI_POOLS: {
  */
 export async function fetchSushiLPYields(): Promise<YieldOpportunity[]> {
   const client = createPublicClient({
-    chain: katana,
-    transport: http(KATANA_RPC),
+    chain: defi-intent,
+    transport: http(L2_RPC),
   });
 
   const opportunities: YieldOpportunity[] = [];

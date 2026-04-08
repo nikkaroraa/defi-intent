@@ -70,7 +70,7 @@ export interface LiquidationOpportunity {
 // CLIENT
 // ===========================================
 
-export function createKatanaClient(): PublicClient {
+export function createDeFi IntentClient(): PublicClient {
   return createPublicClient({
     chain: {
       id: CHAIN.id,

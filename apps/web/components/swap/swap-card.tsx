@@ -80,7 +80,7 @@ export function SwapCard() {
   const { address, isConnected, chainId: walletChainId } = useAccount();
   const { switchChain } = useSwitchChain();
 
-  const [selectedChain, setSelectedChain] = useState<Chain>(CHAINS[1]); // Default to Katana
+  const [selectedChain, setSelectedChain] = useState<Chain>(CHAINS[1]); // Default to Base
   const [tokenIn, setTokenIn] = useState<Token | null>(null);
   const [tokenOut, setTokenOut] = useState<Token | null>(null);
   const [amountIn, setAmountIn] = useState('');

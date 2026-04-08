@@ -1,12 +1,12 @@
 {
-  "name": "@katana-intent/yield",
+  "name": "@defi-intent/yield",
   "version": "0.1.0",
-  "description": "Unified yield aggregator for Katana L2",
+  "description": "Unified yield aggregator for DeFi Intent",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "katana-yield": "dist/cli.js"
+    "defi-intent-yield": "dist/cli.js"
   },
   "exports": {
     ".": {

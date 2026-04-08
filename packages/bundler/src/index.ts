@@ -1,6 +1,6 @@
 /**
- * @katana-intent/bundler
- * Multicall batch transaction builder for Katana L2
+ * @defi-intent/bundler
+ * Multicall batch transaction builder for L2
  */
 
 // Re-export everything
@@ -18,4 +18,4 @@ export {
   encodeWrapETH,
   encodeUnwrapETH,
 } from "./actions.js";
-export { CONTRACTS, TOKENS, katana } from "./config.js";
+export { CONTRACTS, TOKENS, defi-intent } from "./config.js";

@@ -1,4 +1,4 @@
-// Intent types for the Katana Intent Layer
+// Intent types for the DeFi Intent Layer
 
 export type IntentType = 
   | 'deposit' 
@@ -73,12 +73,12 @@ export interface ChainConfig {
   };
 }
 
-// Katana chain config
+// DeFi Intent chain config
 export const KATANA_CHAIN: ChainConfig = {
-  id: 1911, // Katana mainnet
-  name: 'Katana',
-  rpcUrl: 'https://rpc.katana.network',
-  explorerUrl: 'https://explorer.katana.network',
+  id: 1911, // DeFi Intent mainnet
+  name: 'DeFi Intent',
+  rpcUrl: 'https://rpc.example.network',
+  explorerUrl: 'https://explorer.defi-intent.network',
   nativeCurrency: {
     name: 'Ether',
     symbol: 'ETH',
@@ -86,7 +86,7 @@ export const KATANA_CHAIN: ChainConfig = {
   },
 };
 
-// Common token addresses on Katana
+// Common token addresses across chains
 export const KATANA_TOKENS: Record<string, { address: string; decimals: number; name: string }> = {
   ETH: {
     address: '0x0000000000000000000000000000000000000000',
@@ -111,6 +111,6 @@ export const KATANA_TOKENS: Record<string, { address: string; decimals: number; 
   AUSD: {
     address: '0xCa72827a3D211CfD8F6b00Ac98824872b72CAb49',
     decimals: 18,
-    name: 'Katana USD',
+    name: 'DeFi Intent USD',
   },
 };

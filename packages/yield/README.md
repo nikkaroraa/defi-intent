@@ -1,6 +1,6 @@
-# @katana-intent/yield
+# @defi-intent/yield
 
-Unified yield aggregator for Katana L2. Fetches yields from all protocols and routes deposits to best opportunities.
+Unified yield aggregator for L2. Fetches yields from all protocols and routes deposits to best opportunities.
 
 ## Features
 
@@ -12,7 +12,7 @@ Unified yield aggregator for Katana L2. Fetches yields from all protocols and ro
 ## Installation
 
 ```bash
-npm install @katana-intent/yield
+npm install @defi-intent/yield
 ```
 
 ## CLI Usage
@@ -48,7 +48,7 @@ import {
   getBestYield,
   buildBestYieldRoute,
   buildSplitYieldRoute,
-} from '@katana-intent/yield';
+} from '@defi-intent/yield';
 
 // Fetch all yields
 const yields = await fetchAllYields();
@@ -110,11 +110,11 @@ interface YieldOpportunity {
 
 ## Integration with Bundler
 
-Use with `@katana-intent/bundler` for batch deposits:
+Use with `@defi-intent/bundler` for batch deposits:
 
 ```typescript
-import { batch } from '@katana-intent/bundler';
-import { buildBestYieldRoute } from '@katana-intent/yield';
+import { batch } from '@defi-intent/bundler';
+import { buildBestYieldRoute } from '@defi-intent/yield';
 
 const route = await buildBestYieldRoute('USDC', '1000', wallet);
 

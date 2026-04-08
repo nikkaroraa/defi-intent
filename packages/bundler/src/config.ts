@@ -1,5 +1,5 @@
 /**
- * Katana Bundler - Configuration
+ * DeFi Intent Bundler - Configuration
  */
 
 import { type Address, type Chain } from "viem";
@@ -8,23 +8,23 @@ import { type Address, type Chain } from "viem";
 // KATANA CHAIN
 // ===========================================
 
-export const katana: Chain = {
+export const l2Chain: Chain = {
   id: 747474,
-  name: "Katana",
+  name: "L2",
   nativeCurrency: {
     decimals: 18,
     name: "Ether",
     symbol: "ETH",
   },
   rpcUrls: {
-    default: { http: ["https://rpc.katana.network"] },
+    default: { http: ["https://rpc.example.network"] },
   },
   blockExplorers: {
-    default: { name: "KatanaScan", url: "https://katanascan.com" },
+    default: { name: "Explorer", url: "https://explorer.example.com" },
   },
 };
 
-export const KATANA_RPC = process.env.KATANA_RPC_URL || "https://rpc.katana.network";
+export const L2_RPC = process.env.L2_RPC_URL || "https://rpc.example.network";
 
 // ===========================================
 // CORE CONTRACTS
@@ -34,7 +34,7 @@ export const CONTRACTS = {
   // Multicall3 (standard deterministic address)
   MULTICALL3: "0xcA11bde05977b3631167028862bE2a173976CA11" as Address,
 
-  // Permit2 (canonical address - verified deployed on Katana)
+  // Permit2 (canonical address - verified deployed across chains)
   PERMIT2: "0x000000000022D473030F116dDEE9F6B43aC78BA3" as Address,
 
   // Sushi

@@ -1,6 +1,6 @@
 /**
- * Katana MEV Bot
- * Detect and execute MEV opportunities on Katana L2
+ * MEV Bot
+ * Detect and execute MEV opportunities across chains L2
  */
 
 // Config

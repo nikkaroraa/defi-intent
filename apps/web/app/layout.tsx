@@ -5,7 +5,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Katana Intent | AI-Powered DeFi',
+  title: 'DeFi Intent | AI-Powered DeFi',
   description: 'Natural language interface to DeFi. Execute swaps, find yields, and manage positions across Ethereum, Base, and Arbitrum.',
   icons: {
     icon: '/favicon.ico',

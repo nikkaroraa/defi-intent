@@ -3,14 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   transpilePackages: [
-    '@katana-intent/shared',
-    '@katana-intent/intent-engine',
-    '@katana-intent/protocol-adapters',
-    '@katana-intent/yield',
-    '@katana-intent/liquidator',
-    '@katana-intent/hyperliquid',
-    '@katana-intent/mev',
-    '@katana-intent/bundler',
+    '@defi-intent/shared',
+    '@defi-intent/intent-engine',
+    '@defi-intent/protocol-adapters',
+    '@defi-intent/yield',
+    '@defi-intent/liquidator',
+    '@defi-intent/hyperliquid',
+    '@defi-intent/mev',
+    '@defi-intent/bundler',
   ],
   webpack: (config, { isServer }) => {
     // Handle node modules that don't work in browser

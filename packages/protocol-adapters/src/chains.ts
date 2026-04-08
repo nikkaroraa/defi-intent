@@ -118,9 +118,9 @@ export const ETHEREUM: ChainConfig = {
 
 export const KATANA: ChainConfig = {
   id: 747474,
-  name: 'Katana',
-  rpc: process.env.KATANA_RPC_URL || 'https://rpc.katana.network',
-  explorer: 'https://katanascan.com',
+  name: 'DeFi Intent',
+  rpc: process.env.L2_RPC_URL || 'https://rpc.example.network',
+  explorer: 'https://explorer.example.com',
   tokens: {
     ETH: {
       address: zeroAddress,

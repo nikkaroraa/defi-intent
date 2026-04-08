@@ -1,6 +1,6 @@
-# Katana Intent ⚔️
+# DeFi Intent ⚔️
 
-> Natural language interface to DeFi on Katana. Make DeFi as easy as talking to a friend.
+> Natural language interface to DeFi across chains. Make DeFi as easy as talking to a friend.
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-14-black" />
@@ -34,7 +34,7 @@ npm run web
 ## Project Structure
 
 ```
-katana-intent/
+defi-intent/
 ├── apps/
 │   ├── web/                 # Next.js frontend
 │   │   ├── app/             # App router pages
@@ -90,7 +90,7 @@ npm run lint     # Lint all packages
 # apps/web/.env.local
 ANTHROPIC_API_KEY=sk-ant-...
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
-KATANA_RPC_URL=https://rpc.katana.network
+# L2_RPC_URL=https://your-l2-rpc-url
 ```
 
 ## Contributing

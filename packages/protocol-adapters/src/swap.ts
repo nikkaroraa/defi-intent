@@ -1,5 +1,5 @@
 /**
- * Sushi Swap Adapter for Katana
+ * Sushi Swap Adapter for DeFi Intent
  * Quote swaps and build calldata for execution
  */
 
@@ -18,14 +18,14 @@ import {
 // KATANA CONFIG
 // ===========================================
 
-const katana = {
+const defi-intent = {
   id: 747474,
-  name: 'Katana',
+  name: 'DeFi Intent',
   nativeCurrency: { decimals: 18, name: 'Ether', symbol: 'ETH' },
-  rpcUrls: { default: { http: ['https://rpc.katana.network'] } },
+  rpcUrls: { default: { http: ['https://rpc.example.network'] } },
 } as const;
 
-const KATANA_RPC = process.env.KATANA_RPC_URL || 'https://rpc.katana.network';
+const L2_RPC = process.env.L2_RPC_URL || 'https://rpc.example.network';
 
 // ===========================================
 // CONTRACTS
@@ -215,8 +215,8 @@ let client: ReturnType<typeof createPublicClient> | null = null;
 function getClient() {
   if (!client) {
     client = createPublicClient({
-      chain: katana,
-      transport: http(KATANA_RPC, { timeout: 15000 }),
+      chain: defi-intent,
+      transport: http(L2_RPC, { timeout: 15000 }),
     });
   }
   return client;

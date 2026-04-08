@@ -1,10 +1,10 @@
 import { createPublicClient, http, formatUnits, type Address } from 'viem';
 import { base } from 'viem/chains';
-import type { TokenBalance } from '@katana-intent/shared';
+import type { TokenBalance } from '@defi-intent/shared';
 
-// Katana is a Base L3, so we'll use Base as a fallback for now
-// Will update RPC when Katana mainnet details are confirmed
-const KATANA_RPC = process.env.KATANA_RPC_URL || 'https://mainnet.base.org';
+// DeFi Intent is a Base L3, so we'll use Base as a fallback for now
+// Will update RPC when DeFi Intent mainnet details are confirmed
+const L2_RPC = process.env.L2_RPC_URL || 'https://mainnet.base.org';
 
 // ERC20 ABI for balance and decimals
 const ERC20_ABI = [
@@ -38,7 +38,7 @@ const ERC20_ABI = [
   },
 ] as const;
 
-// Token list with logos - common tokens on Base/Katana
+// Token list with logos - common tokens on Base/DeFi Intent
 const TOKEN_LIST: Array<{
   address: Address;
   symbol: string;
@@ -78,7 +78,7 @@ const TOKEN_LIST: Array<{
 
 export async function fetchTokenBalances(
   walletAddress: Address,
-  rpcUrl: string = KATANA_RPC
+  rpcUrl: string = L2_RPC
 ): Promise<TokenBalance[]> {
   const client = createPublicClient({
     chain: base,

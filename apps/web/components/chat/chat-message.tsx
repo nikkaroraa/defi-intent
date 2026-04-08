@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { User, Bot, Loader2 } from 'lucide-react';
-import type { ChatMessage } from '@katana-intent/shared';
+import type { ChatMessage } from '@defi-intent/shared';
 import { cn } from '@/lib/utils';
 
 interface ChatMessageProps {

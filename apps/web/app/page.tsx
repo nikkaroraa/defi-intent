@@ -11,7 +11,7 @@ export default function LandingPage() {
             <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
               <Sword className="w-4 h-4 text-white" />
             </div>
-            <span className="font-semibold text-[15px]">Katana Intent</span>
+            <span className="font-semibold text-[15px]">DeFi Intent</span>
           </div>
           <Link
             href="/app"
@@ -31,7 +31,7 @@ export default function LandingPage() {
             plain English.
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mb-10">
-            Describe what you want. Katana figures out the best route, finds the
+            Describe what you want. DeFi Intent figures out the best route, finds the
             highest yields, and executes across Ethereum, Base, and Arbitrum.
           </p>
           <Link
@@ -123,7 +123,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border/40 py-8 px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between text-xs text-muted-foreground">
-          <span>Katana Intent</span>
+          <span>DeFi Intent</span>
           <span>Ethereum &middot; Base &middot; Arbitrum</span>
         </div>
       </footer>

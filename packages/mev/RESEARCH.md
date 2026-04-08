@@ -1,19 +1,19 @@
-# Katana MEV Research
+# MEV Research
 
 ## Executive Summary
 
-MEV (Maximal Extractable Value) on Katana L2 presents unique opportunities and challenges compared to Ethereum mainnet. As a new L2 with lower liquidity, price inefficiencies are more common but execution risks are higher.
+MEV (Maximal Extractable Value) across chains L2 presents unique opportunities and challenges compared to Ethereum mainnet. As a new L2 with lower liquidity, price inefficiencies are more common but execution risks are higher.
 
-## 1. Katana L2 Architecture Analysis
+## 1. L2 Architecture Analysis
 
 ### Sequencer Behavior
-- **Centralized sequencer**: Katana uses a centralized sequencer (like most L2s)
+- **Centralized sequencer**: The L2 uses a centralized sequencer (like most L2s)
 - **No public mempool**: Transactions go directly to sequencer, limiting traditional MEV
 - **FCFS ordering**: First-come-first-served ordering (unconfirmed - needs verification)
 - **Block time**: ~2 seconds
 
 ### Implications for MEV
-| Factor | Mainnet | Katana L2 |
+| Factor | Mainnet | L2 |
 |--------|---------|-----------|
 | Mempool visibility | Public | Private/None |
 | Sandwich attacks | Common | Difficult |
@@ -21,13 +21,13 @@ MEV (Maximal Extractable Value) on Katana L2 presents unique opportunities and c
 | Arbitrage | Competitive | Less competitive |
 | Gas auctions | Yes | Minimal |
 
-## 2. MEV Opportunities on Katana
+## 2. MEV Opportunities across chains
 
 ### 2.1 Cross-Pool Arbitrage ⭐ HIGH POTENTIAL
 
 **Description**: Price differences between Sushi V2 and V3 pools for the same pair.
 
-**Why it works on Katana**:
+**Why it works across chains**:
 - Low liquidity = larger price impacts
 - Fewer arbitrageurs = less competition
 - Multiple fee tiers in V3 (0.05%, 0.3%, 1%)
@@ -57,7 +57,7 @@ If product of exchange rates > 1, profit exists
 
 **Description**: Provide concentrated liquidity just before a large swap, capture fees, remove after.
 
-**On Katana**:
+**On L2**:
 - Sushi V3 supports concentrated liquidity
 - Requires mempool visibility OR very fast block monitoring
 - Likely NOT viable without sequencer cooperation
@@ -68,7 +68,7 @@ If product of exchange rates > 1, profit exists
 
 **Description**: Front-run and back-run victim transactions.
 
-**On Katana**:
+**On L2**:
 - No public mempool = can't see pending transactions
 - Sequencer controls ordering
 - Only possible if you ARE the sequencer
@@ -79,7 +79,7 @@ If product of exchange rates > 1, profit exists
 
 **Description**: Follow profitable transactions and copy/improve them.
 
-**On Katana**:
+**On L2**:
 - Monitor confirmed blocks for large swaps
 - Execute arbitrage in next block
 - Lower competition than mainnet
@@ -140,7 +140,7 @@ Block N+1: Backrun with arbitrage trade
          │
          ▼
 ┌─────────────────────────────────────────────────────┐
-│                  Katana RPC                         │
+│                  L2 RPC                         │
 │  • Block monitoring (newHeads subscription)        │
 │  • Reserve queries (multicall)                     │
 │  • Transaction submission                          │
@@ -174,7 +174,7 @@ contract AtomicArb {
 
 ## 5. Competitive Analysis
 
-### Who else is doing MEV on Katana?
+### Who else is doing MEV across chains?
 - Likely few/none currently (new L2)
 - First mover advantage exists
 - As volume grows, competition will increase
@@ -213,11 +213,11 @@ contract AtomicArb {
 - [ ] Latency optimization
 - [ ] Gas optimization
 - [ ] Machine learning for prediction
-- [ ] Cross-L2 arbitrage (Katana ↔ Base)
+- [ ] Cross-L2 arbitrage (L2 ↔ Base)
 
 ## 8. Conclusion
 
-**MEV on Katana is viable** but different from mainnet:
+**MEV across chains is viable** but different from mainnet:
 
 ✅ **Good opportunities**:
 - Cross-pool arbitrage (V2 vs V3)

@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 /**
- * Katana MEV Bot CLI
+ * MEV Bot CLI
  * Scan, monitor, and execute MEV opportunities
  */
 
@@ -31,7 +31,7 @@ import { formatUnits } from 'viem';
 // ===========================================
 
 async function cmdHelp() {
-  console.log('\n🤖 Katana MEV Bot');
+  console.log('\n🤖 MEV Bot');
   console.log('='.repeat(50));
   console.log('\nCommands:');
   console.log('  scan       - Scan for arbitrage opportunities');

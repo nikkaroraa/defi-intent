@@ -1,6 +1,6 @@
 /**
  * Liquidator Configuration
- * Morpho Blue contracts and ABIs for Katana
+ * Morpho Blue contracts and ABIs for DeFi Intent
  */
 
 import { type Address } from 'viem';

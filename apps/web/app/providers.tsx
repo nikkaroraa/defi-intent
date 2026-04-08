@@ -50,7 +50,7 @@ const Header = dynamic(() => import('@/components/header').then(mod => mod.Heade
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-indigo-600" />
-          <span className="font-semibold text-base text-gray-100">Katana<span className="text-indigo-400"> Intent</span></span>
+          <span className="font-semibold text-base text-gray-100">DeFi<span className="text-indigo-400"> Intent</span></span>
         </div>
       </div>
     </header>
@@ -75,7 +75,7 @@ export function Providers({ children }: { children: ReactNode }) {
         },
       ],
       {
-        appName: 'Katana Intent',
+        appName: 'DeFi Intent',
         projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'demo',
       }
     );

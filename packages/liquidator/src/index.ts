@@ -1,6 +1,6 @@
 /**
- * Katana Liquidation Bot
- * Monitor and execute Morpho Blue liquidations on Katana
+ * DeFi Intent Liquidation Bot
+ * Monitor and execute Morpho Blue liquidations across chains
  */
 
 // Config
@@ -20,7 +20,7 @@ export {
 
 // Scanner
 export {
-  createKatanaClient,
+  createDeFi IntentClient,
   getMarketState,
   getPosition,
   scanForLiquidatablePositions,

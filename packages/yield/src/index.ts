@@ -1,6 +1,6 @@
 /**
- * @katana-intent/yield
- * Unified yield aggregator for Katana L2
+ * @defi-intent/yield
+ * Unified yield aggregator for L2
  */
 
 // Config

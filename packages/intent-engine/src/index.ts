@@ -1,2 +1,2 @@
 export { IntentParser, quickParse } from './parser';
-export type { Intent, ParseResult } from '@katana-intent/shared';
+export type { Intent, ParseResult } from '@defi-intent/shared';

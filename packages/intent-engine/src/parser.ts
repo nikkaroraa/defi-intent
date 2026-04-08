@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { Intent, ParseResult, IntentType, QueryType } from '@katana-intent/shared';
+import type { Intent, ParseResult, IntentType, QueryType } from '@defi-intent/shared';
 
-const SYSTEM_PROMPT = `You are a DeFi intent parser for the Katana network. Your job is to understand natural language requests and convert them to structured intents.
+const SYSTEM_PROMPT = `You are a DeFi intent parser for DeFi protocols. Your job is to understand natural language requests and convert them to structured intents.
 
 Available intent types:
 - deposit: Put tokens into a yield protocol (Yearn, Morpho, Spectra)

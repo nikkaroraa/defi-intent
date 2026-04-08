@@ -19,7 +19,7 @@ interface Intent {
 }
 
 // System prompt for intent parsing
-const SYSTEM_PROMPT = `You are a DeFi intent parser for the Katana network. Parse natural language into structured intents.
+const SYSTEM_PROMPT = `You are a DeFi intent parser. Parse natural language into structured intents for DeFi operations across Ethereum, Base, and Arbitrum.
 
 Available intent types:
 - deposit: Put tokens into a yield protocol

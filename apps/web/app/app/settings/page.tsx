@@ -54,7 +54,7 @@ export default function SettingsPage() {
           ) : (
             <div className="text-center py-4">
               <p className="text-sm text-muted-foreground mb-4">
-                Connect your wallet to use Katana Intent
+                Connect your wallet to use DeFi Intent
               </p>
               <ConnectButton />
             </div>
@@ -122,7 +122,7 @@ export default function SettingsPage() {
 
         {/* About */}
         <section className="text-center text-sm text-muted-foreground">
-          <p>Katana Intent v0.1.0</p>
+          <p>DeFi Intent v0.1.0</p>
           <p className="mt-1">
             Built by{' '}
             <a

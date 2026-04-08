@@ -69,7 +69,7 @@ export default function HistoryPage() {
                   >
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-xs font-medium text-muted-foreground">
-                        {msg.role === 'user' ? 'You' : 'Katana'}
+                        {msg.role === 'user' ? 'You' : 'DeFi Intent'}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {new Date(msg.timestamp).toLocaleTimeString()}

@@ -1,5 +1,5 @@
 {
-  "name": "@katana-intent/shared",
+  "name": "@defi-intent/shared",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

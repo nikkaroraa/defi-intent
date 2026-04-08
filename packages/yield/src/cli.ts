@@ -1,6 +1,6 @@
 #!/usr/bin/env npx tsx
 /**
- * Katana Yield CLI
+ * DeFi Intent Yield CLI
  * Unified yield aggregator commands
  */
 
@@ -71,14 +71,14 @@ function printOpp(opp: YieldOpportunity, index?: number) {
 
 function printHelp() {
   console.log(`
-${BOLD}Katana Yield CLI${NC}
+${BOLD}DeFi Intent Yield CLI${NC}
 Unified yield aggregator with multi-chain rebalancer
 
 ${BOLD}Usage:${NC}
   npx tsx src/cli.ts <command> [options]
 
 ${BOLD}Yield Commands:${NC}
-  list                          List all yield opportunities (Katana)
+  list                          List all yield opportunities (DeFi Intent)
   list --protocol <name>        Filter by protocol (morpho, yearn, spectra, sushi-lp)
   list --min-apy <percent>      Filter by minimum APY (e.g., 5 for 5%)
   
@@ -126,7 +126,7 @@ async function cmdList(args: string[]) {
     }
   }
 
-  console.log(`\n${BOLD}${CYAN}⚔️ Katana Yield Hub${NC}\n`);
+  console.log(`\n${BOLD}${CYAN}⚔️ Yield Hub${NC}\n`);
 
   const protocols = protocol ? [protocol] : undefined;
   const yields = await fetchAllYields({ protocols, minApy });

@@ -1,11 +1,11 @@
 #!/usr/bin/env tsx
 /**
- * Katana Liquidation Bot CLI
+ * DeFi Intent Liquidation Bot CLI
  * Monitor and execute Morpho Blue liquidations
  */
 
 import {
-  createKatanaClient,
+  createDeFi IntentClient,
   scanForLiquidatablePositions,
   getMarketState,
   formatOpportunity,
@@ -36,7 +36,7 @@ const SAMPLE_MARKETS: `0x${string}`[] = [
 // ===========================================
 
 async function cmdInfo() {
-  console.log('\n🔍 Katana Liquidation Bot');
+  console.log('\n🔍 DeFi Intent Liquidation Bot');
   console.log('='.repeat(50));
   console.log(`Morpho Blue: ${MORPHO_BLUE}`);
   console.log('\nSupported Tokens:');
@@ -54,7 +54,7 @@ async function cmdScan() {
   console.log('\n🔍 Scanning for liquidatable positions...');
   console.log('='.repeat(50));
 
-  const client = createKatanaClient();
+  const client = createDeFi IntentClient();
 
   // Get recent block
   const block = await client.getBlockNumber();
@@ -87,7 +87,7 @@ async function cmdMonitor(intervalMs: number = 30000) {
   console.log('Press Ctrl+C to stop\n');
   console.log('='.repeat(50));
 
-  const client = createKatanaClient();
+  const client = createDeFi IntentClient();
   let lastBlock = BigInt(0);
 
   async function check() {
@@ -181,7 +181,7 @@ async function cmdSimulate() {
   console.log('\nMock Position:');
   console.log(formatOpportunity(mockOpportunity));
 
-  const client = createKatanaClient();
+  const client = createDeFi IntentClient();
   const result = await executeLiquidation(client, null, mockOpportunity, {
     ...DEFAULT_CONFIG,
     dryRun: true,
@@ -195,7 +195,7 @@ async function cmdMarkets() {
   console.log('\n📊 Fetching market states...');
   console.log('='.repeat(50));
 
-  const client = createKatanaClient();
+  const client = createDeFi IntentClient();
 
   for (const marketId of SAMPLE_MARKETS) {
     const state = await getMarketState(client, marketId);

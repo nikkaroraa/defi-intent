@@ -8,7 +8,7 @@ import {
   createPublicClient,
   http,
 } from "viem";
-import { katana, KATANA_RPC, CONTRACTS, MULTICALL3_ABI } from "./config.js";
+import { defi-intent, L2_RPC, CONTRACTS, MULTICALL3_ABI } from "./config.js";
 import {
   type Call,
   type SwapParams,
@@ -157,8 +157,8 @@ export class BatchBuilder {
     error?: string;
   }> {
     const client = createPublicClient({
-      chain: katana,
-      transport: http(KATANA_RPC),
+      chain: defi-intent,
+      transport: http(L2_RPC),
     });
 
     const { to, data, value } = this.build();

@@ -1,17 +1,17 @@
-# @katana-intent/bundler
+# @defi-intent/bundler
 
-Multicall batch transaction builder for Katana L2.
+Multicall batch transaction builder for L2.
 
 ## Installation
 
 ```bash
-npm install @katana-intent/bundler
+npm install @defi-intent/bundler
 ```
 
 ## Quick Start
 
 ```typescript
-import { batch } from '@katana-intent/bundler';
+import { batch } from '@defi-intent/bundler';
 
 const wallet = '0x...';
 

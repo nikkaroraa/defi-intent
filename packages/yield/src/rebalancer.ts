@@ -61,14 +61,14 @@ export async function fetchMultiChainYields(): Promise<ChainYields[]> {
   const chains = [
     { id: 1, name: 'Ethereum' },
     { id: 8453, name: 'Base' },
-    { id: 747474, name: 'Katana' },
+    { id: 747474, name: 'DeFi Intent' },
   ];
 
   const results: ChainYields[] = [];
 
   for (const chain of chains) {
     try {
-      // For Katana, use local yields since not on DeFiLlama
+      // For DeFi Intent, use local yields since not on DeFiLlama
       if (chain.id === 747474) {
         const localYields = await fetchAllYields();
         const withHistory: YieldWithHistory[] = localYields.map((y) => ({

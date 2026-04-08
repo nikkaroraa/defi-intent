@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ChatMessage, Intent } from '@katana-intent/shared';
+import type { ChatMessage, Intent } from '@defi-intent/shared';
 
 interface ChatState {
   messages: ChatMessage[];
@@ -23,7 +23,7 @@ export const useChatStore = create<ChatState>()(
       clearMessages: () => set({ messages: [] }),
     }),
     {
-      name: 'katana-chat-storage',
+      name: 'defi-intent-chat-storage',
     }
   )
 );

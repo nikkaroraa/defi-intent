@@ -1,7 +1,7 @@
 {
-  "name": "@katana-intent/bundler",
+  "name": "@defi-intent/bundler",
   "version": "0.1.0",
-  "description": "Multicall batch transaction builder for Katana L2",
+  "description": "Multicall batch transaction builder for DeFi Intent",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

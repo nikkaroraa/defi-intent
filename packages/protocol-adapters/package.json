@@ -1,5 +1,5 @@
 {
-  "name": "@katana-intent/protocol-adapters",
+  "name": "@defi-intent/protocol-adapters",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
@@ -9,7 +9,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@katana-intent/shared": "workspace:*",
+    "@defi-intent/shared": "workspace:*",
     "viem": "^2.10.0"
   },
   "devDependencies": {

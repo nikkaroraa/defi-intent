@@ -162,7 +162,7 @@ function calculateStdDev(values: number[]): number {
 const CHAIN_MAP: Record<string, string> = {
   ethereum: 'Ethereum',
   base: 'Base',
-  katana: 'Katana',
+  defi-intent: 'DeFi Intent',
 };
 
 const PROTOCOL_MAP: Record<string, Protocol> = {
@@ -245,7 +245,7 @@ export async function fetchYieldsWithHistory(
 
 /**
  * Generate simulated historical data for protocols not covered by DeFiLlama
- * Used for Katana-specific protocols
+ * Used for DeFi Intent-specific protocols
  */
 export function generateSimulatedHistory(
   currentApy: number,

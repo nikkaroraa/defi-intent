@@ -1,7 +1,7 @@
-# Katana Intent Layer — Project Plan
+# DeFi Intent Layer — Project Plan
 
 ## Vision
-Natural language interface to DeFi on Katana. Make DeFi as easy as talking to a friend.
+Natural language interface to DeFi across chains. Make DeFi as easy as talking to a friend.
 
 > "Deposit 100 USDC into the best yield"
 > "What's my liquidation risk?"
@@ -11,7 +11,7 @@ Natural language interface to DeFi on Katana. Make DeFi as easy as talking to a 
 
 ## Goals
 
-1. **Grow Katana** — Onboard normies, reduce friction
+1. **Grow DeFi Intent** — Onboard normies, reduce friction
 2. **Build Nik's brand** — AI + DeFi thought leader, build in public
 3. **Monetize** — Free tier + premium features
 
@@ -24,7 +24,7 @@ Natural language interface to DeFi on Katana. Make DeFi as easy as talking to a 
 | Feature | Description |
 |---------|-------------|
 | **Intent Parser** | NL → structured DeFi action (deposit, withdraw, swap, stake) |
-| **Yield Finder** | "Best yield for USDC" → ranks Katana pools by APY |
+| **Yield Finder** | "Best yield for USDC" → ranks DeFi Intent pools by APY |
 | **Position Viewer** | "Show my positions" → fetches wallet state |
 | **Risk Analyzer** | "Am I safe?" → checks health factors, liquidation risk |
 | **Action Builder** | Constructs transaction, shows preview before execute |
@@ -68,7 +68,7 @@ Natural language interface to DeFi on Katana. Make DeFi as easy as talking to a 
                   │
                   ▼
 ┌─────────────────────────────────────────────────────────┐
-│              Katana RPC + Indexers                      │
+│              L2 RPC + Indexers                      │
 │  Read: wallet state, pool data, prices                  │
 │  Write: transactions via user wallet                    │
 └─────────────────────────────────────────────────────────┘
@@ -168,7 +168,7 @@ interface Intent {
 
 | Day | Tweet |
 |-----|-------|
-| 1 | "building something for katana. defi should be as easy as texting." |
+| 1 | "building something for defi-intent. defi should be as easy as texting." |
 | 3 | Video: first demo of intent parsing |
 | 5 | Thread: "how I'm using AI to make DeFi accessible" |
 | 7 | "shipped the MVP. try it: [link]" |
@@ -181,7 +181,7 @@ interface Intent {
 ## File Structure
 
 ```
-katana-intent/
+defi-intent/
 ├── apps/
 │   ├── web/              # Next.js frontend
 │   │   ├── app/
@@ -217,7 +217,7 @@ katana-intent/
 | AI misparses intent | Always show preview, require confirm |
 | Smart contract risk | Read-only queries by default, audit actions |
 | Low adoption | Telegram bot lowers friction, Twitter marketing |
-| Katana changes APIs | Abstract protocol layer, easy to update |
+| DeFi Intent changes APIs | Abstract protocol layer, easy to update |
 
 ---
 
@@ -227,4 +227,4 @@ katana-intent/
 2. Build intent parser (Claude API)
 3. Create basic chat UI
 4. Implement balance query
-5. Push to GitHub: nikkaroraa/katana-intent
+5. Push to GitHub: nikkaroraa/defi-intent

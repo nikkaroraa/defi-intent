@@ -100,7 +100,7 @@ export function ChatContainer() {
                   <Sword className="w-5 h-5 text-white" />
                 </div>
                 <h2 className="text-xl font-semibold text-foreground">
-                  Katana Intent
+                  DeFi Intent
                 </h2>
               </div>
               <p className="text-muted-foreground mb-8 text-[15px] leading-relaxed">
