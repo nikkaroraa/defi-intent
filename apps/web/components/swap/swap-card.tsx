@@ -207,13 +207,13 @@ export function SwapCard() {
               </button>
             )}
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-3">
             <input
               type="number"
               value={amountIn}
               onChange={(e) => setAmountIn(e.target.value)}
               placeholder="0.0"
-              className="flex-1 bg-transparent text-2xl font-medium outline-none"
+              className="flex-1 min-w-0 bg-transparent text-2xl font-medium outline-none"
             />
             <TokenSelector
               tokens={tokens}
@@ -241,8 +241,8 @@ export function SwapCard() {
           <div className="flex justify-between mb-2">
             <span className="text-sm text-muted-foreground">To</span>
           </div>
-          <div className="flex gap-4">
-            <div className="flex-1 text-2xl font-medium">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0 text-2xl font-medium truncate">
               {isLoading ? (
                 <span className="text-muted-foreground">Loading...</span>
               ) : quote ? (

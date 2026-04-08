@@ -12,17 +12,17 @@ const CHAINS: Chain[] = [
   {
     id: 1,
     name: 'Ethereum',
-    logoURI: 'https://assets.coingecko.com/coins/images/279/small/ethereum.png',
+    logoURI: 'https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg',
   },
   {
     id: 8453,
     name: 'Base',
-    logoURI: 'https://assets.coingecko.com/coins/images/31197/small/base.png',
+    logoURI: 'https://icons.llamao.fi/icons/chains/rsz_base.jpg',
   },
   {
     id: 42161,
     name: 'Arbitrum',
-    logoURI: 'https://assets.coingecko.com/coins/images/16547/small/photo_2023-03-29_21.47.00.jpeg',
+    logoURI: 'https://icons.llamao.fi/icons/chains/rsz_arbitrum.jpg',
   },
 ];
 
