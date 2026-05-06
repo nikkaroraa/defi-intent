@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import Anthropic from '@anthropic-ai/sdk';
+import { generateObject } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 import { createPublicClient, http, formatUnits, type Address } from 'viem';
 import { mainnet } from 'viem/chains';
 
-// Intent types
-type IntentType = 'deposit' | 'withdraw' | 'swap' | 'query';
-type QueryType = 'positions' | 'yields' | 'risk' | 'balance';
+// Intent schema (runtime validated via Zod, also generates the type)
+const IntentSchema = z.object({
+  type: z.enum(['deposit', 'withdraw', 'swap', 'query']),
+  tokenIn: z.string().nullable().optional(),
+  tokenOut: z.string().nullable().optional(),
+  amount: z.string().nullable().optional(),
+  protocol: z.enum(['morpho', 'sushi', 'yearn', 'best']).nullable().optional(),
+  query: z.enum(['positions', 'yields', 'risk', 'balance']).nullable().optional(),
+  confidence: z.number().min(0).max(1),
+});
+
+type IntentType = z.infer<typeof IntentSchema>['type'];
+type QueryType = NonNullable<z.infer<typeof IntentSchema>['query']>;
 
 interface Intent {
   type: IntentType;
@@ -196,33 +208,28 @@ export async function POST(request: NextRequest) {
     // Try quick parse first
     let intent = quickParse(message);
 
-    // If no quick match, use Claude for parsing
-    if (!intent && process.env.ANTHROPIC_API_KEY) {
+    // If no quick match, use the LLM for parsing
+    if (!intent && process.env.OPENAI_API_KEY) {
       try {
-        const anthropic = new Anthropic();
-        const response = await anthropic.messages.create({
-          model: 'claude-3-5-sonnet-20241022',
-          max_tokens: 256,
+        const { object } = await generateObject({
+          model: openai('gpt-4o-mini'),
+          schema: IntentSchema,
           system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: message }],
+          prompt: message,
         });
 
-        const content = response.content[0];
-        if (content.type === 'text') {
-          const parsed = JSON.parse(content.text);
-          intent = {
-            type: parsed.type,
-            tokenIn: parsed.tokenIn || undefined,
-            tokenOut: parsed.tokenOut || undefined,
-            amount: parsed.amount || undefined,
-            protocol: parsed.protocol || undefined,
-            query: parsed.query || undefined,
-            confidence: parsed.confidence,
-            rawInput: message,
-          };
-        }
+        intent = {
+          type: object.type,
+          tokenIn: object.tokenIn || undefined,
+          tokenOut: object.tokenOut || undefined,
+          amount: object.amount || undefined,
+          protocol: object.protocol || undefined,
+          query: object.query || undefined,
+          confidence: object.confidence,
+          rawInput: message,
+        };
       } catch (e) {
-        console.error('Claude parse error:', e);
+        console.error('Intent parse error:', e);
       }
     }
 

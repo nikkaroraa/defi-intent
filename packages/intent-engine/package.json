@@ -10,7 +10,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.24.0",
+    "ai": "^3.4.0",
+    "@ai-sdk/openai": "^0.0.70",
+    "zod": "^3.23.0",
     "@defi-intent/shared": "workspace:*"
   },
   "devDependencies": {
