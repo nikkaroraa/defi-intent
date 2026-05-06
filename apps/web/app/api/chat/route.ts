@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createPublicClient, http, formatUnits, type Address } from 'viem';
-import { base } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
 // Intent types
-type IntentType = 'deposit' | 'withdraw' | 'swap' | 'stake' | 'borrow' | 'repay' | 'query';
+type IntentType = 'deposit' | 'withdraw' | 'swap' | 'query';
 type QueryType = 'positions' | 'yields' | 'risk' | 'balance';
 
 interface Intent {
@@ -19,24 +19,21 @@ interface Intent {
 }
 
 // System prompt for intent parsing
-const SYSTEM_PROMPT = `You are a DeFi intent parser. Parse natural language into structured intents for DeFi operations across Ethereum, Base, and Arbitrum.
+const SYSTEM_PROMPT = `You are a DeFi intent parser. Parse natural language into structured intents for DeFi operations on Ethereum mainnet.
 
 Available intent types:
 - deposit: Put tokens into a yield protocol
-- withdraw: Take tokens out of a protocol  
+- withdraw: Take tokens out of a protocol
 - swap: Exchange one token for another
-- stake: Stake tokens for rewards
-- borrow: Borrow against collateral
-- repay: Repay borrowed tokens
 - query: Information requests
 
 Respond ONLY with valid JSON:
 {
-  "type": "deposit|withdraw|swap|stake|borrow|repay|query",
+  "type": "deposit|withdraw|swap|query",
   "tokenIn": "TOKEN_SYMBOL or null",
   "tokenOut": "TOKEN_SYMBOL or null",
   "amount": "number string, 'half', 'all', or null",
-  "protocol": "morpho|sushi|yearn|spectra|best or null",
+  "protocol": "morpho|sushi|yearn|best or null",
   "query": "positions|yields|risk|balance or null",
   "confidence": 0.0-1.0
 }`;
@@ -112,16 +109,17 @@ const ERC20_ABI = [
   },
 ] as const;
 
-// Token list
+// Token list (Ethereum mainnet)
 const TOKENS = [
-  { symbol: 'USDC', address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as Address, decimals: 6 },
-  { symbol: 'WETH', address: '0x4200000000000000000000000000000000000006' as Address, decimals: 18 },
-  { symbol: 'DAI', address: '0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb' as Address, decimals: 18 },
+  { symbol: 'USDC', address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48' as Address, decimals: 6 },
+  { symbol: 'WETH', address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2' as Address, decimals: 18 },
+  { symbol: 'DAI', address: '0x6B175474E89094C44Da98b954EedeAC495271d0F' as Address, decimals: 18 },
+  { symbol: 'USDT', address: '0xdAC17F958D2ee523a2206206994597C13D831ec7' as Address, decimals: 6 },
 ];
 
 async function fetchBalances(walletAddress: Address) {
   const client = createPublicClient({
-    chain: base,
+    chain: mainnet,
     transport: http(),
   });
 
@@ -252,7 +250,7 @@ export async function POST(request: NextRequest) {
 
           case 'positions':
             response = walletAddress
-              ? "📊 **Your Positions:**\n\nNo active positions found yet. Try depositing into a yield protocol.\n\nCheck the **Yields** tab to find the best opportunities across Ethereum, Base, and Arbitrum."
+              ? "📊 **Your Positions:**\n\nNo active positions found yet. Try depositing into a yield protocol.\n\nCheck the **Yields** tab to find the best opportunities on Ethereum mainnet."
               : 'Connect your wallet and I can inspect your live positions across supported chains.';
             break;
 

@@ -124,7 +124,7 @@ export default function LandingPage() {
       <footer className="border-t border-border/40 py-8 px-6">
         <div className="max-w-5xl mx-auto flex items-center justify-between text-xs text-muted-foreground">
           <span>DeFi Intent</span>
-          <span>Ethereum &middot; Base &middot; Arbitrum</span>
+          <span>Ethereum mainnet</span>
         </div>
       </footer>
     </div>
