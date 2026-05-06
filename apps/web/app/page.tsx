@@ -32,7 +32,7 @@ export default function LandingPage() {
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-lg mb-10">
             Describe what you want. DeFi Intent figures out the best route, finds the
-            highest yields, and executes across Ethereum, Base, and Arbitrum.
+            highest yields, and executes on Ethereum.
           </p>
           <Link
             href="/app"
@@ -62,18 +62,18 @@ export default function LandingPage() {
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-medium">02</p>
-              <h3 className="text-lg font-medium mb-2">Cross-chain yields</h3>
+              <h3 className="text-lg font-medium mb-2">Sustained yields</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Live APY data from Morpho, Yearn, Spectra, and Hyperliquid.
-                Sorted by 30-day sustained yield so you see what actually holds up.
+                Live APY data from Morpho and Yearn. Sorted by 30-day sustained
+                yield so you see what actually holds up.
               </p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-widest text-muted-foreground mb-3 font-medium">03</p>
               <h3 className="text-lg font-medium mb-2">Best execution</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Quotes from Uniswap, SushiSwap, and Aerodrome in parallel.
-                Picks the best rate. You confirm and sign.
+                Quotes from Uniswap and SushiSwap in parallel. Picks the best
+                rate. You confirm and sign.
               </p>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto">
           <p className="text-xs uppercase tracking-widest text-muted-foreground mb-6 font-medium">Integrated protocols</p>
           <div className="flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground">
-            {['Uniswap', 'SushiSwap', 'Aerodrome', 'Morpho', 'Yearn', 'Spectra', 'Hyperliquid'].map((name) => (
+            {['Uniswap', 'SushiSwap', 'Morpho', 'Yearn'].map((name) => (
               <span key={name} className="hover:text-foreground transition-colors">{name}</span>
             ))}
           </div>
